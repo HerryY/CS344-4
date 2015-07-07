@@ -1,4 +1,11 @@
 #!/bin/bash
+#Name: Marta Wegner
+#Class: CS344
+#Program 1
+#Description: This program calculates the mean
+#and median of both rows and columns input
+#Input can be given as a file or as standard input
+
 
 #store name of temp file in TMP var
 TMP=temp$$
@@ -16,12 +23,14 @@ if [ $# -eq 0 ]
 #store in temp file
 elif [ $# -eq 1 ]
    then
+	#is a valid option is provided take input
 	if [[ "$1" == -r* ]] || [[ "$1" == -c* ]]
 	   then 
 		while read stdInp
 		do 
 	   	   echo $stdInp >> $TMP
 		done
+	#if -r or -c is not specified give error
 	else 
  	   echo "Invalid command" >&2
 	   exit 1
@@ -36,10 +45,7 @@ elif [ ! -r "$2" ]
 #to a temp file
 elif [ $# -eq 2 ]
    then
-	while read line
-	do
-	   echo $line >> $TMP
-	done < "$2"
+	cp $2 $TMP
 #Else the user gave the wrong # of arguments
 else 
    echo "Wrong number of arguments" >&2
@@ -58,17 +64,17 @@ if [[ "$1" == -r* ]]
 	#get each # in the line into var x
 	for x in $line
 	do
-	  #add x to sum
+	  #add x to sum of row
 	  sum=`expr $sum + $x`
 	
-	  #add x to array
+	  #add x to array for the line
 	  lineArr[$colCnt]=$x
 
 	  #increase col cnt for each #(col)
 	  colCnt=`expr $colCnt + 1`
 	done 
 
-	#calculate average of row
+	#calculate average of row from sum
 	avg=`expr $sum / $colCnt`
 
 	#round average if needed
@@ -82,7 +88,7 @@ if [[ "$1" == -r* ]]
 	avgArr[$rowCnt]=$avg
 
 	#calculate median
-	#sort row
+	#sort row from lineArr
 	sorted=( $(
 		for y in "${lineArr[@]}"
 		do
@@ -111,6 +117,7 @@ if [[ "$1" == -r* ]]
 elif [[ "$1" == -c* ]]
    then
 	rowCnt=0
+	declare -A colArr
    	while read line
    	do
            colCnt=0
@@ -128,13 +135,14 @@ elif [[ "$1" == -c* ]]
 	
 	     #Add x to colArr
 	     colArr[$colCnt,$rowCnt]=$x
+
 	     #increase col cnt for each #(col)
 	     colCnt=`expr $colCnt + 1`
 	   done
 
 	done < "$TMP" 
 
-	#calculate average of col
+	#calculate average of col from colSum array
 	colCnt=0
 	for i in ${colSum[@]}
 	do
@@ -153,7 +161,7 @@ elif [[ "$1" == -c* ]]
 	done 
 
 	#calculate median
-	#sort col
+	#sort cols from colArr - each row is a col
 	for ((i=0;i<colCnt;i++))
 	do
 	   for ((j=1;j<=rowCnt;j++))
@@ -161,7 +169,7 @@ elif [[ "$1" == -c* ]]
 		lineArr[$j]=${colArr[$i,$j]}
 	   done
 	
-	#sort row
+	#sort col
 	sorted=( $(
 		for y in "${lineArr[@]}"
 		do
@@ -177,16 +185,18 @@ elif [[ "$1" == -c* ]]
 	done
 
         #print results
-   printf "Average: "
-   for i in ${avgArr[@]}
+   	echo "Average: "
+    	for i in ${avgArr[@]}
 	do
   	   printf "$i "
 	done
 
-   printf "\nMedian: "
-   for i in ${medArr[@]}
-	do
-  	   printf "$i "
+	printf "\n"
+
+   	echo "Median: "
+   	for i in ${medArr[@]}
+	   do
+  	      printf "$i "
 	done
 
 	printf "\n"
@@ -199,5 +209,5 @@ else
 fi
 
 #if completed successfully, remove temp file and exit
-rm -f $TMP
+rm $TMP
 exit 0
