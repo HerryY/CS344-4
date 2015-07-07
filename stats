@@ -36,10 +36,11 @@ elif [ ! -r "$2" ]
 #to a temp file
 elif [ $# -eq 2 ]
    then
-	while read line
-	do
-	   echo $line >> $TMP
-	done < "$2"
+	cp $2 $TMP
+	#while read line
+	#do
+	 #  echo $line >> $TMP
+	#done < "$2"
 #Else the user gave the wrong # of arguments
 else 
    echo "Wrong number of arguments" >&2
@@ -200,5 +201,5 @@ else
 fi
 
 #if completed successfully, remove temp file and exit
-rm -f $TMP
+rm $TMP
 exit 0
