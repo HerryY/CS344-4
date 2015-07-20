@@ -1,13 +1,20 @@
+/**********************************************************
+ * Name: Marta Wegner
+ * Assignent #2
+ * File Name: wegnerma.adventure.c
+ * CS 344
+ *********************************************************/
 #include<stdio.h>
 #include<time.h>
 #include<stdlib.h>
 #include<fcntl.h>
 #include<sys/types.h>
+#include<sys/stat.h>
 #include<dirent.h>
 
 struct Room {
-	char name;
-	char connections[6];
+	int name;
+	int connections[6];
 	int numConnections;
 };
 
@@ -16,9 +23,9 @@ struct Room {
  * 	Creates room - assigns name and initializes
  * 	# of connections to 0
  *********************************************************/
-void createRoom (struct Room s, char n) {
-	s.name = n;
-	s.numConnections = 0;
+void createRoom (struct Room *s, int n) {
+	s->name = n;
+	s->numConnections = 0;
 }
 
 /**********************************************************
@@ -29,29 +36,36 @@ void createRoom (struct Room s, char n) {
  * 	Else the connection is made and # of connections 
  * 	is increments and the function returns
  *********************************************************/
-void updateConnection (struct Room s, char connection) {
-	if (s.numConnections == 6) {
+void updateConnection (struct Room *s, int connection) {
+	if (s->numConnections == 6) {
 		//Return - max # of connections reached
+		printf("full: %d\n", s->numConnections);
 		return;
 	}
-	else if (s.name == connection) {
+	else if (s->name == connection) {
 		//Return if trying to make a connection to same room
+	
+		printf("name: %d\n", s->numConnections);
 		return;
 	}
 	else {
 		//If connection to that room is already made return
 		int i;
-		for (i = 0; i < s.numConnections; i++) {
-			if (s.connections[i] = connection) {
+		for (i = 0; i < s->numConnections; i++) {
+			if (s->connections[i] == connection) {
+				printf("used: %d", s->numConnections);
 				return;
 			}
 		}
 
+		printf("here; %d\n", s->numConnections);
+
 		//update conncetions
-		s.connections[s.numConnections] = connection;
+		s->connections[s->numConnections] = connection;
 		
 		//update # connections
-		s.numConnections++;
+		s->numConnections++;
+		printf("after: %d\n", s->numConnections);
 	}
 }
 
@@ -61,7 +75,6 @@ void updateConnection (struct Room s, char connection) {
 int main(){
 	int i;
 	FILE * afile;
-//	DIR * dirct;
 
 	//Seed rand
 	srand(time(NULL));
@@ -76,79 +89,80 @@ int main(){
 	snprintf(directory, sizeof directory, "%s%d", user, pid);
 
 	//Create directory
-	mkdir(directory, 0777);
+	mkdir(directory, 0755);
 
 	//Create rooms
-	struct Room A;
-	struct Room B;
-	struct Room C;
-	struct Room D;
-	struct Room E;
-	struct Room F;
-	struct Room G;
+	struct Room one;
+	struct Room two;
+	struct Room three;
+	struct Room four;
+	struct Room five;
+	struct Room six;
+	struct Room seven;
 
-	createRoom(A, 'A');		
-	createRoom(B, 'B');	
-	createRoom(C, 'C');	
-	createRoom(D, 'D');	
-	createRoom(E, 'E');	
-	createRoom(F, 'F');	
-	createRoom(G, 'G');	
+	createRoom(&one, 1);		
+	createRoom(&two, 2);	
+	createRoom(&three, 3);	
+	createRoom(&four, 4);	
+	createRoom(&five, 5);	
+	createRoom(&six, 6);	
+	createRoom(&seven, 7);	
 
-	//Create 3 connections for A
-	while(A.numConnections < 3) {
+	//Create 3 connections for 1
+	while(one.numConnections < 3) {
 		//Generate random room
-		char r = (rand() % 7) + 65;	
+		int r = (rand() % 7) + 1;	
 
+		printf("r %d\n", r);
 		//Update connection for A and random room
-		updateConnection(A, r);
+		updateConnection(&one, r);
 
-		if (r == 'B') {
-			updateConnection(B, 'A');
+		if (r == 2) {
+			updateConnection(&two, 1);
 		}
-		else if (r == 'C') {
-			updateConnection(C, 'A');
+		else if (r == 3) {
+			updateConnection(&three, 1);
 		}
-		else if (r == 'D') {
-			updateConnection(D, 'A');
+		else if (r == 4) {
+			updateConnection(&four, 1);
 		}
-		else if (r == 'E') {
-			updateConnection(E, 'A');
+		else if (r == 5) {
+			updateConnection(&five, 1);
 		}
-		else if (r == 'F') {
-			updateConnection(F, 'A');
+		else if (r == 6) {
+			updateConnection(&six, 1);
 		}
-		else if (r == 'G') {
-			updateConnection(G, 'A');
+		else if (r == 7) {
+			updateConnection(&seven, 1);
 		}
 	}
-	//Create connctions for room B
-	while(B.numConnections < 3) {
-		//Generate random room
-		char r = (rand() % 7) + 65;	
-
-		//Update connection for B and random room
-		updateConnection(B, r);
-
-		if (r == 'A') {
-			updateConnection(A, 'B');
-		}
-		else if (r == 'C') {
-			updateConnection(C, 'B');
-		}
-		else if (r == 'D') {
-			updateConnection(D, 'B');
-		}
-		else if (r == 'E') {
-			updateConnection(E, 'B');
-		}
-		else if (r == 'F') {
-			updateConnection(F, 'B');
-		}
-		else if (r == 'G') {
-			updateConnection(G, 'B');
-		}
-	}
+//	//Create connctions for room B
+//	while(B.numConnections < 3) {
+//		//Generate random room
+//		char r = (rand() % 7) + 65;	
+//
+//		//Update connection for B and random room
+//		updateConnection(B, r);
+//
+//		if (r == 'A') {
+//			updateConnection(A, 'B');
+//		}
+//		else if (r == 'C') {
+//			updateConnection(C, 'B');
+//		}
+//		else if (r == 'D') {
+//			updateConnection(D, 'B');
+//		}
+//		else if (r == 'E') {
+//			updateConnection(E, 'B');
+//		}
+//		else if (r == 'F') {
+//			updateConnection(F, 'B');
+//		}
+//		else if (r == 'G') {
+//			updateConnection(G, 'B');
+//		}
+//	}
 //	//Create connections for room C
 //	while(C.numConnections < 3) {
 //		//Generate random room
@@ -285,29 +299,29 @@ int main(){
 //		}
 //	}
 
-	char fileA[21];
-	char fileB[21];
-	char fileC[21];
-	char fileD[21];
-	char fileE[21];
-	char fileF[21];
-	char fileG[21];
+	char file1[23];
 
-	snprintf(fileA, sizeof fileA, "%s/%s", directory, "A");
-	snprintf (fileB, sizeof fileB, "%s/%s", directory, "B");
-	snprintf(fileC, sizeof fileC, "%s/%s", directory, "C");
-	snprintf(fileD, sizeof fileD, "%s/%s", directory, "D");
-	snprintf(fileE, sizeof fileE, "%s/%s", directory, "E");
-	snprintf(fileF, sizeof fileF, "%s/%s", directory, "F");
-	snprintf(fileG, sizeof fileG, "%s/%s", directory, "G");
-      
-	afile = fopen(fileA, "w");
+	snprintf(file1, sizeof file1, "%s/%s", directory, "1");
+//	snprintf (fileB, sizeof fileB, "%s/%s", directory, "B");
+//	snprintf(fileC, sizeof fileC, "%s/%s", directory, "C");
+//	snprintf(fileD, sizeof fileD, "%s/%s", directory, "D");
+//	snprintf(fileE, sizeof fileE, "%s/%s", directory, "E");
+//	snprintf(fileF, sizeof fileF, "%s/%s", directory, "F");
+//	snprintf(fileG, sizeof fileG, "%s/%s", directory, "G");
+     
+	printf("%s", file1);
+ 
+	afile = fopen(file1, "w" );
 
-	
-//	for (i = 0; i < 2; i++){
-//		printf("%d", i);
-		//fprintf(fileA, "%c", A.connections[i]);
-//	}
+	if (!afile) {
+		printf("Failed");
+	}
+	else {	
+	printf("%d", one.numConnections);
+	for (i = 0; i < one.numConnections; i++){
+		fprintf(afile, "%d\n", one.connections[i]);
+	}
+	}
 
       close();
 
