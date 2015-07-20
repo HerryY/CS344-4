@@ -218,7 +218,7 @@ int main(){
 		}
 	}
 	//Create 3 connections for 5
-	while(one.numConnections < 3) {
+	while(five.numConnections < 3) {
 		//Generate random room
 		int r = (rand() % 7) + 1;	
 
@@ -299,50 +299,58 @@ int main(){
 		}
 	}
 
-	char file[23];
+	char file[22];
 
-//	for (i = 0; i < 7; i++) {
-//		snprintf(file, sizeof file, "%s/%s", directory, i);
-//		
-//		afile = fopen(file, "w");
-//
-//		int numCon;
-//		int * con;
-//		if (i == 1) {
-//			numCon = one.numConnections;
-//			con = one.connections;
-//		}
-//		else if (i == 2) {
-//			numCon = two.numConnections;
-//			con = two.connections;
-//		}
-//		else if (i == 3) {
-//			numCon = three.numConnections;
-//			con = three.connections;
-//		}
-//		else if (i == 4) {
-//			numCon = four.numConnections;
-//			con = four.connections;
-//		}
-//		else if (i == 5) {
-//			numCon = five.numConnections;
-//			con = five.connections;
-//		}
-//		else if (i == 6) {
-//			numCon = six.numConnections;
-//			con = six.connections;
-//		}
-//		else if (i == 7) {
-//			numCon = seven.numConnections;
-//			con = seven.connections;
-//		}		
-//
-//		for (i = 0; i < numCon; i++) {
-//			fprintf(afile, "%d\n", con[i]);
-//		}
-//
-//		close(afile);
-//	}
+	//Create and write to room files
+	for (i = 1; i < 8; i++) {
+		//File pathway
+		snprintf(file, sizeof file, "%s/%d", directory, i);
+	
+		//open file
+		afile = fopen(file, "w");
+
+		//Info for file
+		int numCon;
+		int * con;
+		if (i == 1) {
+			numCon = one.numConnections;
+			con = one.connections;
+		}
+		else if (i == 2) {
+			numCon = two.numConnections;
+			con = two.connections;
+		}
+		else if (i == 3) {
+			numCon = three.numConnections;
+			con = three.connections;
+		}
+		else if (i == 4) {
+			numCon = four.numConnections;
+			con = four.connections;
+		}
+		else if (i == 5) {
+			numCon = five.numConnections;
+			con = five.connections;
+		}
+		else if (i == 6) {
+			numCon = six.numConnections;
+			con = six.connections;
+		}
+		else if (i == 7) {
+			numCon = seven.numConnections;
+			con = seven.connections;
+		}		
+
+		//Write name to file
+		fprintf(afile, "ROOM NAME: %d\n", i);
+		//Write connections to files
+		int j;
+		for (j = 0; j < numCon; j++) {
+			fprintf(afile, "CONNECTION %d: %d\n", j + 1, con[j]);
+		}
+
+		close(afile);
+      }
 
 	//exit(0);
 }
