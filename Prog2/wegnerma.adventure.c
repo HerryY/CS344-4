@@ -39,13 +39,11 @@ void createRoom (struct Room *s, int n) {
 void updateConnection (struct Room *s, int connection) {
 	if (s->numConnections == 6) {
 		//Return - max # of connections reached
-		printf("full: %d\n", s->numConnections);
 		return;
 	}
 	else if (s->name == connection) {
 		//Return if trying to make a connection to same room
 	
-		printf("name: %d\n", s->numConnections);
 		return;
 	}
 	else {
@@ -53,19 +51,15 @@ void updateConnection (struct Room *s, int connection) {
 		int i;
 		for (i = 0; i < s->numConnections; i++) {
 			if (s->connections[i] == connection) {
-				printf("used: %d", s->numConnections);
 				return;
 			}
 		}
-
-		printf("here; %d\n", s->numConnections);
 
 		//update conncetions
 		s->connections[s->numConnections] = connection;
 		
 		//update # connections
 		s->numConnections++;
-		printf("after: %d\n", s->numConnections);
 	}
 }
 
@@ -91,7 +85,11 @@ int main(){
 	//Create directory
 	mkdir(directory, 0755);
 
-	//Create rooms
+	//array of rooms
+	int roomArr[7];
+
+
+	//rooms
 	struct Room one;
 	struct Room two;
 	struct Room three;
@@ -99,210 +97,466 @@ int main(){
 	struct Room five;
 	struct Room six;
 	struct Room seven;
+	struct Room eight;
+	struct Room nine;
+	struct Room ten;
 
-	createRoom(&one, 1);		
-	createRoom(&two, 2);	
-	createRoom(&three, 3);	
-	createRoom(&four, 4);	
-	createRoom(&five, 5);	
-	createRoom(&six, 6);	
-	createRoom(&seven, 7);	
+	//Select and create rooms
+	for (i = 0; i < 7; i++) {
+		int unique = 0;
+		int roomNum;
+	
+		//Generate random room number while roomNum is in 
+		//roomArr
+		while (!unique) {	
+			roomNum = (rand() % 10) + 1;
 
-	//Create 3 connections for 1
-	while(one.numConnections < 3) {
-		//Generate random room
-		int r = (rand() % 7) + 1;	
+			unique = 1;
+			int u;
+			for (u = 0;  u < i; u++) {
+				if (roomArr[u] == roomNum) {
+					unique = 0;
+				}
+			}
+		}
 
-		//Update connection for A and random room
-		updateConnection(&one, r);
+		//Add room to arr
+		roomArr[i] = roomNum;
 
-		if (r == 2) {
-			updateConnection(&two, 1);
+		//Create room and initilaize
+		if ( roomNum == 1) {	
+			createRoom(&one, 1);
 		}
-		else if (r == 3) {
-			updateConnection(&three, 1);
+		else if(roomNum == 2) {
+			createRoom(&two, 2);
 		}
-		else if (r == 4) {
-			updateConnection(&four, 1);
+		else if(roomNum == 3) {
+			createRoom(&three, 3);
 		}
-		else if (r == 5) {
-			updateConnection(&five, 1);
+		else if(roomNum == 4) {
+			createRoom(&four, 4);
+		}	
+		else if(roomNum == 5) {
+			createRoom(&five, 5);
 		}
-		else if (r == 6) {
-			updateConnection(&six, 1);
+		else if(roomNum == 6) {
+			createRoom(&six, 6);
 		}
-		else if (r == 7) {
-			updateConnection(&seven, 1);
+		else if(roomNum == 7) {
+			createRoom(&seven, 7);
+		}
+		else if(roomNum == 8) {
+			createRoom(&eight, 8);	
+		}
+		else if(roomNum == 9) {
+			createRoom(&nine, 9);
+		}
+		else if(roomNum == 10) {
+			createRoom(&ten, 10);
 		}
 	}
+
+	//Create connections
+	for (i = 0; i < 7; i++){
+		if (roomArr[i] == 1) {
+			//Create 3 connections for 1
+			while(one.numConnections < 3) {
+				//Generate random room
+				int rnd = rand() % 7;	
+				int r = roomArr[rnd];
+
+				//Update connection for 1 and random room
+				updateConnection(&one, r);
+
+				if (r == 2) {
+					updateConnection(&two, 1);
+				}
+				else if (r == 3) {
+					updateConnection(&three, 1);
+				}
+				else if (r == 4) {
+					updateConnection(&four, 1);
+				}
+				else if (r == 5) {
+					updateConnection(&five, 1);
+				}
+				else if (r == 6) {
+					updateConnection(&six, 1);
+				}
+				else if (r == 7) {
+					updateConnection(&seven, 1);
+				}
+				else if (r == 8) {
+					updateConnection(&eight, 1);
+				}
+				else if (r == 9) {
+					updateConnection(&nine, 1);
+				}
+				else if (r == 10) {
+					updateConnection(&ten, 1);
+				}
+			}
+		}
+		else if (roomArr[i] == 2) {
+			//Create 3 connections for 2
+			while(two.numConnections < 3) {
+				//Generate random room
+				int rnd = rand() % 7;	
+				int r = roomArr[rnd];
 				
-	//Create 3 connections for 2
-	while(two.numConnections < 3) {
-		//Generate random room
-		int r = (rand() % 7) + 1;	
+				//Update connection for 2 and random room
+				updateConnection(&two, r);
 
-		//Update connection for A and random room
-		updateConnection(&two, r);
+				if (r == 1) {
+					updateConnection(&one, 2);
+				}
+				else if (r == 3) {
+					updateConnection(&three, 2);
+				}
+				else if (r == 4) {
+					updateConnection(&four, 2);
+				}
+				else if (r == 5) {
+					updateConnection(&five, 2);
+				}
+				else if (r == 6) {
+					updateConnection(&six, 2);
+				}
+				else if (r == 7) {
+					updateConnection(&seven, 2);
+				}
+				else if (r == 8) {
+					updateConnection(&eight, 2);
+				}
+				else if (r == 9) {
+					updateConnection(&nine, 2);
+				}
+				else if (r == 10) {
+					updateConnection(&ten, 2);
+				}
+			}
+		}
+		else if (roomArr[i] == 3) {
+			//Create 3 connections for 3
+			while(three.numConnections < 3) {
+				//Generate random room
+				int rnd = rand() % 7;	
+				int r = roomArr[rnd];
 
-		if (r == 1) {
-			updateConnection(&one, 2);
+				//Update connection for 3 and random room
+				updateConnection(&three, r);
+	
+				if (r == 2) {
+					updateConnection(&two, 3);
+				}
+				else if (r == 1) {
+					updateConnection(&one, 3);
+				}
+				else if (r == 4) {
+					updateConnection(&four, 3);
+				}
+				else if (r == 5) {
+					updateConnection(&five, 3);
+				}
+				else if (r == 6) {
+					updateConnection(&six, 3);
+				}
+				else if (r == 7) {
+					updateConnection(&seven, 3);
+				}
+				else if (r == 8) {
+					updateConnection(&eight, 3);
+				}
+				else if (r == 9) {
+					updateConnection(&nine, 3);
+				}
+				else if (r == 10) {
+					updateConnection(&ten, 3);
+				}
+			}
 		}
-		else if (r == 3) {
-			updateConnection(&three, 2);
+		else if (roomArr[i] == 4) {
+			//Create 3 connections for 4
+			while(four.numConnections < 3) {
+				//Generate random room
+				int rnd = rand() % 7;	
+				int r = roomArr[rnd];
+
+				//Update connection for 4 and random room
+				updateConnection(&four, r);
+
+				if (r == 2) {
+					updateConnection(&two, 4);
+				}
+				else if (r == 3) {
+					updateConnection(&three, 4);
+				}
+				else if (r == 1) {
+					updateConnection(&one, 4);
+				}
+				else if (r == 5) {
+					updateConnection(&five, 4);
+				}
+				else if (r == 6) {
+					updateConnection(&six, 4);
+				}
+				else if (r == 7) {
+					updateConnection(&seven, 4);
+				}
+				else if (r == 8) {
+					updateConnection(&eight, 4);
+				}
+				else if (r == 9) {
+					updateConnection(&nine, 4);
+				}
+				else if (r == 10) {
+					updateConnection(&ten, 4);
+				}
+			}
 		}
-		else if (r == 4) {
-			updateConnection(&four, 2);
+		else if (roomArr[i] == 5) {
+			//Create 3 connections for 5
+				while(five.numConnections < 3) {
+				//Generate random room
+				int rnd = rand() % 7;	
+				int r = roomArr[rnd];
+
+				//Update connection for 5 and random room
+				updateConnection(&five, r);
+		
+				if (r == 2) {
+					updateConnection(&two, 5);
+				}
+				else if (r == 3) {
+					updateConnection(&three, 5);
+				}
+				else if (r == 4) {
+					updateConnection(&four, 5);
+				}
+				else if (r == 1) {
+					updateConnection(&one, 5);
+				}
+				else if (r == 6) {
+					updateConnection(&six, 5);
+				}
+				else if (r == 7) {
+					updateConnection(&seven, 5);
+				}
+				else if (r == 8) {
+					updateConnection(&eight, 5);
+				}
+				else if (r == 9) {
+					updateConnection(&nine, 5);
+				}
+				else if (r == 10) {
+					updateConnection(&ten, 5);
+				}
+			}
 		}
-		else if (r == 5) {
-			updateConnection(&five, 2);
+		else if (roomArr[i] == 6) {
+			//Create 3 connections for 6
+			while(six.numConnections < 3) {
+				//Generate random room
+				int rnd = rand() % 7;
+				int r = roomArr[rnd];	
+
+				//Update connection for 6 and random room
+				updateConnection(&six, r);
+
+				if (r == 2) {
+					updateConnection(&two, 6);
+				}
+				else if (r == 3) {
+					updateConnection(&three, 6);
+				}
+				else if (r == 4) {
+					updateConnection(&four, 6);
+				}
+				else if (r == 5) {
+					updateConnection(&five, 6);
+				}
+				else if (r == 1) {
+					updateConnection(&one, 6);
+				}
+				else if (r == 7) {
+					updateConnection(&seven, 6);
+				}
+				else if (r == 8) {
+					updateConnection(&eight, 6);
+				}
+				else if (r == 9) {
+					updateConnection(&nine, 6);
+				}
+				else if (r == 10) {
+					updateConnection(&ten, 6);
+				}
+			}
 		}
-		else if (r == 6) {
-			updateConnection(&six, 2);
+		else if (roomArr[i] == 7) {
+			//Create 3 connections for 1
+			while(seven.numConnections < 3) {
+				//Generate random room
+				int rnd = rand() % 7;
+				int r = roomArr[rnd];	
+
+				//Update connection for A and random room
+				updateConnection(&seven, r);
+
+				if (r == 2) {
+					updateConnection(&two, 7);
+				}
+				else if (r == 3) {
+					updateConnection(&three, 7);
+				}
+				else if (r == 4) {
+					updateConnection(&four, 7);
+				}
+				else if (r == 5) {
+					updateConnection(&five, 7);
+				}
+				else if (r == 6) {
+					updateConnection(&six, 7);
+				}
+				else if (r == 1) {
+					updateConnection(&one, 7);
+				}
+				else if (r == 8) {
+					updateConnection(&eight, 7);
+				}
+				else if (r == 9) {
+					updateConnection(&nine, 7);
+				}
+				else if (r == 10) {
+					updateConnection(&ten, 7);
+				}
+			}
 		}
-		else if (r == 7) {
-			updateConnection(&seven, 2);
+		else if (roomArr[i] == 8) {
+			//Create 3 connections for 8
+			while(eight.numConnections < 3) {
+				//Generate random room
+				int rnd = rand() % 7;	
+				int r = roomArr[rnd];
+
+				//Update connection for 5 and random room
+				updateConnection(&eight, r);
+		
+				if (r == 2) {
+					updateConnection(&two, 8);
+				}
+				else if (r == 3) {
+					updateConnection(&three, 8);
+				}
+				else if (r == 4) {
+					updateConnection(&four, 8);
+				}
+				else if (r == 5) {
+					updateConnection(&five, 8);
+				}
+				else if (r == 6) {
+					updateConnection(&six, 8);
+				}
+				else if (r == 7) {
+					updateConnection(&seven, 8);
+				}
+				else if (r == 1) {
+					updateConnection(&one, 8);
+				}
+				else if (r == 9) {
+					updateConnection(&nine, 8);
+				}
+				else if (r == 10) {
+					updateConnection(&ten, 8);
+				}
+			}
+		}
+		else if (roomArr[i] == 9) {
+			//Create 3 connections for 9
+			while(nine.numConnections < 3) {
+				//Generate random room
+				int rnd = rand() % 7;
+				int r = roomArr[rnd];	
+
+				//Update connection for 9 and random room
+				updateConnection(&nine, r);
+
+				if (r == 2) {
+					updateConnection(&two, 9);
+				}
+				else if (r == 3) {
+					updateConnection(&three, 9);
+				}
+				else if (r == 4) {
+					updateConnection(&four, 9);
+				}
+				else if (r == 5) {
+					updateConnection(&five, 9);
+				}
+				else if (r == 6) {
+					updateConnection(&six, 9);
+				}
+				else if (r == 7) {
+					updateConnection(&seven, 9);
+				}
+				else if (r == 8) {
+					updateConnection(&eight, 9);
+				}
+				else if (r == 1) {
+					updateConnection(&one, 9);
+				}
+				else if (r == 10) {
+					updateConnection(&ten, 9);
+				}
+			}
+		}
+		else if (roomArr[i] == 10) {
+			//Create 10 connections for 1
+			while(ten.numConnections < 3) {
+				//Generate random room
+				int rnd = rand() % 7;
+				int r = roomArr[rnd];	
+
+				//Update connection for A and random room
+				updateConnection(&ten, r);
+
+				if (r == 2) {
+					updateConnection(&two, 10);
+				}
+				else if (r == 3) {
+					updateConnection(&three, 10);
+				}
+				else if (r == 4) {
+					updateConnection(&four, 10);
+				}
+				else if (r == 5) {
+					updateConnection(&five, 10);
+				}
+				else if (r == 6) {
+					updateConnection(&six, 10);
+				}
+				else if (r == 7) {
+					updateConnection(&seven, 10);
+				}
+				else if (r == 8) {
+					updateConnection(&eight, 10);
+				}
+				else if (r == 9) {
+					updateConnection(&nine, 10);
+				}
+				else if (r == 1) {
+					updateConnection(&one, 10);
+				}
+			}
 		}
 	}
-	//Create 3 connections for 3
-	while(three.numConnections < 3) {
-		//Generate random room
-		int r = (rand() % 7) + 1;	
 
-		//Update connection for A and random room
-		updateConnection(&three, r);
-
-		if (r == 2) {
-			updateConnection(&two, 3);
-		}
-		else if (r == 1) {
-			updateConnection(&one, 3);
-		}
-		else if (r == 4) {
-			updateConnection(&four, 3);
-		}
-		else if (r == 5) {
-			updateConnection(&five, 3);
-		}
-		else if (r == 6) {
-			updateConnection(&six, 3);
-		}
-		else if (r == 7) {
-			updateConnection(&seven, 3);
-		}
-	}
-	//Create 3 connections for 4
-	while(four.numConnections < 3) {
-		//Generate random room
-		int r = (rand() % 7) + 1;	
-
-		//Update connection for A and random room
-		updateConnection(&four, r);
-
-		if (r == 2) {
-			updateConnection(&two, 4);
-		}
-		else if (r == 3) {
-			updateConnection(&three, 4);
-		}
-		else if (r == 1) {
-			updateConnection(&one, 4);
-		}
-		else if (r == 5) {
-			updateConnection(&five, 4);
-		}
-		else if (r == 6) {
-			updateConnection(&six, 4);
-		}
-		else if (r == 7) {
-			updateConnection(&seven, 4);
-		}
-	}
-	//Create 3 connections for 5
-	while(five.numConnections < 3) {
-		//Generate random room
-		int r = (rand() % 7) + 1;	
-
-		//Update connection for A and random room
-		updateConnection(&five, r);
-
-		if (r == 2) {
-			updateConnection(&two, 5);
-		}
-		else if (r == 3) {
-			updateConnection(&three, 5);
-		}
-		else if (r == 4) {
-			updateConnection(&four, 5);
-		}
-		else if (r == 1) {
-			updateConnection(&one, 5);
-		}
-		else if (r == 6) {
-			updateConnection(&six, 5);
-		}
-		else if (r == 7) {
-			updateConnection(&seven, 5);
-		}
-	}
-	//Create 3 connections for 6
-	while(six.numConnections < 3) {
-		//Generate random room
-		int r = (rand() % 7) + 1;	
-
-		//Update connection for A and random room
-		updateConnection(&six, r);
-
-		if (r == 2) {
-			updateConnection(&two, 6);
-		}
-		else if (r == 3) {
-			updateConnection(&three, 6);
-		}
-		else if (r == 4) {
-			updateConnection(&four, 6);
-		}
-		else if (r == 5) {
-			updateConnection(&five, 6);
-		}
-		else if (r == 1) {
-			updateConnection(&one, 6);
-		}
-		else if (r == 7) {
-			updateConnection(&seven, 6);
-		}
-	}
-	//Create 3 connections for 1
-	while(seven.numConnections < 3) {
-		//Generate random room
-		int r = (rand() % 7) + 1;	
-
-		//Update connection for A and random room
-		updateConnection(&seven, r);
-
-		if (r == 2) {
-			updateConnection(&two, 7);
-		}
-		else if (r == 3) {
-			updateConnection(&three, 7);
-		}
-		else if (r == 4) {
-			updateConnection(&four, 7);
-		}
-		else if (r == 5) {
-			updateConnection(&five, 7);
-		}
-		else if (r == 6) {
-			updateConnection(&six, 7);
-		}
-		else if (r == 1) {
-			updateConnection(&one, 7);
-		}
-	}
-
-	char file[22];
+	char file[23];
 
 	//Create and write to room files
-	for (i = 1; i < 8; i++) {
+	int k;
+	for (k = 0; k < 7; k++) {
+		i = roomArr[k];
+
 		//File pathway
 		snprintf(file, sizeof file, "%s/%d", directory, i);
 	
@@ -340,17 +594,27 @@ int main(){
 			numCon = seven.numConnections;
 			con = seven.connections;
 		}		
+		else if (i == 8) {
+			numCon = eight.numConnections;
+			con = eight.connections;
+		}
+		else if (i == 9) {
+			numCon = nine.numConnections;
+			con = nine.connections;
+		}
+		else if (i == 10) {
+			numCon = ten.numConnections;
+			con = ten.connections;
+		}
 
 		//Write name to file
 		fprintf(afile, "ROOM NAME: %d\n", i);
 		//Write connections to files
 		int j;
 		for (j = 0; j < numCon; j++) {
-			fprintf(afile, "CONNECTION %d: %d\n", j + 1, con[j]);
+			fprintf(afile, "CONNECTION %d: %d\n", j+1, con[j]);
 		}
 
 		close(afile);
-      }
-
-	//exit(0);
+	}     
 }
