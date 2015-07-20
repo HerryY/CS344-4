@@ -1,6 +1,9 @@
 #include<stdio.h>
 #include<time.h>
 #include<stdlib.h>
+#include<fcntl.h>
+#include<sys/types.h>
+#include<dirent.h>
 
 struct Room {
 	char name;
@@ -56,6 +59,10 @@ void updateConnection (struct Room s, char connection) {
  * 			main
  *********************************************************/
 int main(){
+	int i;
+	FILE * afile;
+//	DIR * dirct;
+
 	//Seed rand
 	srand(time(NULL));
 
@@ -64,7 +71,7 @@ int main(){
 
 	int pid  = getpid();
 
-	char directory[30];
+	char directory[20];
 
 	snprintf(directory, sizeof directory, "%s%d", user, pid);
 
@@ -142,141 +149,167 @@ int main(){
 			updateConnection(G, 'B');
 		}
 	}
-	//Create connections for room C
-	while(C.numConnections < 3) {
-		//Generate random room
-		char r = (rand() % 7) + 65;	
-
-		//Update connection for C and random room
-		updateConnection(C, r);
-
-		if (r == 'B') {
-			updateConnection(B, 'C');
-		}
-		else if (r == 'A') {
-			updateConnection(A, 'C');
-		}
-		else if (r == 'D') {
-			updateConnection(D, 'C');
-		}
-		else if (r == 'E') {
-			updateConnection(E, 'C');
-		}
-		else if (r == 'F') {
-			updateConnection(F, 'C');
-		}
-		else if (r == 'G') {
-			updateConnection(G, 'C');
-		}
-	}
+//	//Create connections for room C
+//	while(C.numConnections < 3) {
+//		//Generate random room
+//		char r = (rand() % 7) + 65;	
+//
+//		//Update connection for C and random room
+//		updateConnection(C, r);
+//
+//		if (r == 'B') {
+//			updateConnection(B, 'C');
+//		}
+//		else if (r == 'A') {
+//			updateConnection(A, 'C');
+//		}
+//		else if (r == 'D') {
+//			updateConnection(D, 'C');
+//		}
+//		else if (r == 'E') {
+//			updateConnection(E, 'C');
+//		}
+//		else if (r == 'F') {
+//			updateConnection(F, 'C');
+//		}
+//		else if (r == 'G') {
+//			updateConnection(G, 'C');
+//		}
+//	}
 	//Create connections for D
-	while(D.numConnections < 3) {
-		//Generate random room
-		char r = (rand() % 7) + 65;	
+//	while(D.numConnections < 3) {
+//		//Generate random room
+//		char r = (rand() % 7) + 65;	
+//
+//		//Update connection for D and random room
+//		updateConnection(D, r);
+//
+//		if (r == 'B') {
+//			updateConnection(B, 'D');
+//		}
+//		else if (r == 'C') {
+//			updateConnection(C, 'D');
+//		}
+//		else if (r == 'A') {
+//			updateConnection(A, 'D');
+//		}
+//		else if (r == 'E') {
+//			updateConnection(E, 'D');
+//		}
+//		else if (r == 'F') {
+//			updateConnection(F, 'D');
+//		}
+//		else if (r == 'G') {
+//			updateConnection(G, 'D');
+//		}
+//	}
+      //Create connections for E
+//	while(E.numConnections < 3) {
+//		//Generate random room
+//		char r = (rand() % 7) + 65;	
+//
+//		//Update connection for E and random room
+//		updateConnection(E, r);
+//
+//		if (r == 'B') {
+//			updateConnection(B, 'E');
+//		}
+//		else if (r == 'C') {
+//			updateConnection(C, 'E');
+//		}
+//		else if (r == 'D') {
+//			updateConnection(D, 'E');
+//		}
+//		else if (r == 'A') {
+//			updateConnection(A, 'E');
+//		}
+//		else if (r == 'F') {
+//			updateConnection(F, 'E');
+//		}
+//		else if (r == 'G') {
+//			updateConnection(G, 'E');
+//		}
+//	}
+//      //Create connections for F
+//	while(F.numConnections < 3) {
+//		//Generate random room
+//		char r = (rand() % 7) + 65;	
+//
+//		//Update connection for A and random room
+//		updateConnection(F, r);
+//
+//		if (r == 'B') {
+//			updateConnection(B, 'F');
+//		}
+//		else if (r == 'C') {
+//			updateConnection(C, 'F');
+//		}
+//		else if (r == 'D') {
+//			updateConnection(D, 'F');
+//		}
+//		else if (r == 'E') {
+//			updateConnection(E, 'F');
+//		}
+//		else if (r == 'A') {
+//			updateConnection(A, 'F');
+//		}
+//		else if (r == 'G') {
+//			updateConnection(G, 'F');
+//		}
+//	}
+//      //Create connections for G
+//	while(G.numConnections < 3) {
+//		//Generate random room
+//		char r = (rand() % 7) + 65;	
+//
+//		//Update connection for A and random room
+//		updateConnection(G, r);
+//
+//		if (r == 'B') {
+//			updateConnection(B, 'G');
+//		}
+//		else if (r == 'C') {
+//			updateConnection(C, 'G');
+//		}
+//		else if (r == 'D') {
+//			updateConnection(D, 'G');
+//		}
+//		else if (r == 'E') {
+//			updateConnection(E, 'G');
+//		}
+//		else if (r == 'F') {
+//			updateConnection(F, 'G');
+//		}
+//		else if (r == 'A') {
+//			updateConnection(A, 'G');
+//		}
+//	}
 
-		//Update connection for D and random room
-		updateConnection(D, r);
+	char fileA[21];
+	char fileB[21];
+	char fileC[21];
+	char fileD[21];
+	char fileE[21];
+	char fileF[21];
+	char fileG[21];
 
-		if (r == 'B') {
-			updateConnection(B, 'D');
-		}
-		else if (r == 'C') {
-			updateConnection(C, 'D');
-		}
-		else if (r == 'A') {
-			updateConnection(A, 'D');
-		}
-		else if (r == 'E') {
-			updateConnection(E, 'D');
-		}
-		else if (r == 'F') {
-			updateConnection(F, 'D');
-		}
-		else if (r == 'G') {
-			updateConnection(G, 'D');
-		}
-	}
-	//Create connections for E
-	while(E.numConnections < 3) {
-		//Generate random room
-		char r = (rand() % 7) + 65;	
+	snprintf(fileA, sizeof fileA, "%s/%s", directory, "A");
+	snprintf (fileB, sizeof fileB, "%s/%s", directory, "B");
+	snprintf(fileC, sizeof fileC, "%s/%s", directory, "C");
+	snprintf(fileD, sizeof fileD, "%s/%s", directory, "D");
+	snprintf(fileE, sizeof fileE, "%s/%s", directory, "E");
+	snprintf(fileF, sizeof fileF, "%s/%s", directory, "F");
+	snprintf(fileG, sizeof fileG, "%s/%s", directory, "G");
+      
+	afile = fopen(fileA, "w");
 
-		//Update connection for E and random room
-		updateConnection(E, r);
+	
+//	for (i = 0; i < 2; i++){
+//		printf("%d", i);
+		//fprintf(fileA, "%c", A.connections[i]);
+//	}
 
-		if (r == 'B') {
-			updateConnection(B, 'E');
-		}
-		else if (r == 'C') {
-			updateConnection(C, 'E');
-		}
-		else if (r == 'D') {
-			updateConnection(D, 'E');
-		}
-		else if (r == 'A') {
-			updateConnection(A, 'E');
-		}
-		else if (r == 'F') {
-			updateConnection(F, 'E');
-		}
-		else if (r == 'G') {
-			updateConnection(G, 'E');
-		}
-	}
-	//Create connections for F
-	while(F.numConnections < 3) {
-		//Generate random room
-		char r = (rand() % 7) + 65;	
-
-		//Update connection for A and random room
-		updateConnection(F, r);
-
-		if (r == 'B') {
-			updateConnection(B, 'F');
-		}
-		else if (r == 'C') {
-			updateConnection(C, 'F');
-		}
-		else if (r == 'D') {
-			updateConnection(D, 'F');
-		}
-		else if (r == 'E') {
-			updateConnection(E, 'F');
-		}
-		else if (r == 'A') {
-			updateConnection(A, 'F');
-		}
-		else if (r == 'G') {
-			updateConnection(G, 'F');
-		}
-	}
-	//Create connections for G
-	while(G.numConnections < 3) {
-		//Generate random room
-		char r = (rand() % 7) + 65;	
-
-		//Update connection for A and random room
-		updateConnection(G, r);
-
-		if (r == 'B') {
-			updateConnection(B, 'G');
-		}
-		else if (r == 'C') {
-			updateConnection(C, 'G');
-		}
-		else if (r == 'D') {
-			updateConnection(D, 'G');
-		}
-		else if (r == 'E') {
-			updateConnection(E, 'G');
-		}
-		else if (r == 'F') {
-			updateConnection(F, 'G');
-		}
-		else if (r == 'A') {
-			updateConnection(A, 'G');
-		}
-	}
+      close();
 
 	//exit(0);
 }
