@@ -11,11 +11,13 @@
 #include<sys/types.h>
 #include<sys/stat.h>
 #include<dirent.h>
+#include<string.h>
 
 struct Room {
 	int name;
 	int connections[6];
 	int numConnections;
+	int type;
 };
 
 /**********************************************************
@@ -26,6 +28,7 @@ struct Room {
 void createRoom (struct Room *s, int n) {
 	s->name = n;
 	s->numConnections = 0;
+	s->type = 0;
 }
 
 /**********************************************************
@@ -550,9 +553,41 @@ int main(){
 		}
 	}
 
+	//Assign start and end room randomly
+	int startRand = rand() % 7;
+	int start = roomArr[startRand];
+
+	int end;
+	do {
+		int endRand = rand() % 7;
+		end = roomArr[endRand];
+	} while (start == end);
+
+	if (start == 1) one.type = 1; 
+	else if (start == 2) two.type = 1;
+	else if (start == 3) three.type = 1;
+	else if (start == 4) four.type = 1;
+	else if (start == 5) five.type = 1;
+	else if (start == 6) six.type = 1;
+	else if (start == 7) seven.type = 1;
+	else if (start == 8) eight.type = 1;
+	else if (start == 9) nine.type = 1;
+	else if (start == 10) ten.type = 1;
+	
+	if (end == 1) one.type = 2; 
+	else if (end == 2) two.type = 2;
+	else if (end == 3) three.type = 2;
+	else if (end == 4) four.type = 2;
+	else if (end == 5) five.type = 2;
+	else if (end == 6) six.type = 2;
+	else if (end == 7) seven.type = 2;
+	else if (end == 8) eight.type = 2;
+	else if (end == 9) nine.type = 2;
+	else if (end == 10) ten.type = 2;
+
 	char file[23];
 
-	//Create and write to room files
+	//Create files  and write to room files
 	int k;
 	for (k = 0; k < 7; k++) {
 		i = roomArr[k];
@@ -566,45 +601,56 @@ int main(){
 		//Info for file
 		int numCon;
 		int * con;
+		int type;
 		if (i == 1) {
 			numCon = one.numConnections;
 			con = one.connections;
+			type = one.type;
 		}
 		else if (i == 2) {
 			numCon = two.numConnections;
 			con = two.connections;
+			type = two.type;
 		}
 		else if (i == 3) {
 			numCon = three.numConnections;
 			con = three.connections;
+			type = three.type;
 		}
 		else if (i == 4) {
 			numCon = four.numConnections;
 			con = four.connections;
+			type = four.type;
 		}
 		else if (i == 5) {
 			numCon = five.numConnections;
 			con = five.connections;
+			type = five.type;
 		}
 		else if (i == 6) {
 			numCon = six.numConnections;
 			con = six.connections;
+			type = six.type;
 		}
 		else if (i == 7) {
 			numCon = seven.numConnections;
 			con = seven.connections;
+			type = seven.type;
 		}		
 		else if (i == 8) {
 			numCon = eight.numConnections;
 			con = eight.connections;
+			type = eight.type;
 		}
 		else if (i == 9) {
 			numCon = nine.numConnections;
 			con = nine.connections;
+			type = nine.type;
 		}
 		else if (i == 10) {
 			numCon = ten.numConnections;
 			con = ten.connections;
+			type = ten.type;
 		}
 
 		//Write name to file
@@ -615,6 +661,95 @@ int main(){
 			fprintf(afile, "CONNECTION %d: %d\n", j+1, con[j]);
 		}
 
-		close(afile);
-	}     
+		//Write room type to file
+		if (type == 0) {
+			fprintf(afile, "ROOM TYPE: MID_ROOM\n\n");
+		}
+		else if (type == 1) {
+			fprintf(afile, "ROOM TYPE: START_ROOM\n\n");
+		}
+		else if (type == 2) {
+			fprintf(afile, "ROOM TYPE: END_ROOM\n\n");
+		}
+
+		fclose(afile);
+	}    
+
+	char rn[6];
+
+	//read in room info from files
+	for (k = 0; k < 7; k++) {
+		i = roomArr[k];
+
+		struct Room  rn;
+
+		if (k == 1) rn = one;
+		else if (k == 2) rn = two;
+		else if (k == 3) rn = three;
+		else if (k == 4) rn = four;
+		else if (k == 5) rn = five;
+		else if (k == 6) rn = six;
+		else if (k == 7) rn = seven;
+
+		//File pathway
+		snprintf(file, sizeof file, "%s/%d", directory, i);
+
+		//open file
+		afile = fopen(file, "r");
+		
+		char * line;
+		size_t len = 0; 
+
+		//get lines of file
+		while(!feof(afile)) {
+
+			getline(&line, &len, afile);
+
+			
+			if (line[5] == 'N') {
+				//Get the name of the file
+				char num = line[11] - 48;
+
+				if(num == 1) {
+					if(line[12] == 48) {
+						num = 10;		
+					}
+				}
+				
+				createRoom(&rn, num);
+
+				printf("%d\n", rn.name);
+			}
+			else if (line[0] == 'C') {
+				//Get the connections for the file
+				//Determine the room number
+			 	char num = line[11] - 48;
+
+				if(num == 1) {
+					if(line[12] == 48) {
+						num = 10;		
+					}
+				}
+
+				//Update the room with the connection
+				updateConnection(&rn, num);
+			}
+			else if (line[5] == 'T') {
+				//Assign type to room
+				char t = line[11];
+
+				if (t == 'E') {
+					rn.type = 2;
+				}
+				else if (t == 'S') {
+					rn.type = 1;
+				}
+				else if (t == 'M') {
+					rn.type = 0;
+				}
+			}
+		}
+
+		fclose(afile);
+	}
 }
