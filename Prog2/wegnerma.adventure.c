@@ -693,8 +693,8 @@ int main(){
 		fclose(afile);
 	}    
 	
-	struct Room * begin;
-	struct Room * finish;
+	struct Room begin;
+	struct Room finish;
 	struct Room  rn;
 
 	//read in room info from files
@@ -748,11 +748,11 @@ int main(){
 
 				if (t == 'E') {
 					rn.type = 2;
-					finish = &rn;
+					finish = rn;
 				}
 				else if (t == 'S') {
 					rn.type = 1;
-					begin = &rn;
+					begin = rn;
 				}
 				else if (t == 'M') {
 					rn.type = 0;
@@ -779,10 +779,10 @@ int main(){
 	int path[100];
 
 	//set current location to start
-	struct Room * cur = begin;
+	struct Room * cur = &begin;
 
 	//print current room
-//	while(cur != finish) {
+	while(cur != &finish) {
 		int valid;
 		int rmNum;
 
@@ -813,8 +813,7 @@ int main(){
 
 		//Add number to path
 		path[steps] = rmNum;
-		
-		printf("rm: %d\n", rmNum); 
+		 
 		if(one.name == rmNum) cur = &one;	
 		else if(two.name == rmNum) cur = &two;
 		else if(three.name == rmNum) cur = &three;
@@ -824,9 +823,7 @@ int main(){
 		else if(seven.name == rmNum) cur = &seven;
 
 		steps++;
-
-		printRoom(cur);
-//	}
+	}
 
 	printf("YOU HAVE FOUND THE END ROOM. CONGRATULATIONS!\n");
 	printf("YOU TOOK %d STEPS. YOUR PATH TO VICTORY WAS:\n", steps);
