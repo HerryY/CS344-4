@@ -67,6 +67,24 @@ void updateConnection (struct Room *s, int connection) {
 }
 
 /**********************************************************
+ * 			printRoom
+ * 	Prints name and connectiosn of room
+ *********************************************************/
+void printRoom(struct Room * s) {
+	printf("CURRENT LOCATION: %d\n", s->name);
+	printf("POSSIBLE CONNECTIONS: ");
+	int i;
+	for (i = 0; i < s->numConnections; i++) {
+		if (i != s->numConnections - 1) {
+			printf("%d, ", s->connections[i]);
+		}
+		else {
+			printf("%d.\n", s->connections[i]);
+		}
+	}
+}
+
+/**********************************************************
  * 			main
  *********************************************************/
 int main(){
@@ -674,22 +692,14 @@ int main(){
 
 		fclose(afile);
 	}    
-
-	char rn[6];
+	
+	struct Room * begin;
+	struct Room * finish;
+	struct Room  rn;
 
 	//read in room info from files
 	for (k = 0; k < 7; k++) {
 		i = roomArr[k];
-
-		struct Room  rn;
-
-		if (k == 1) rn = one;
-		else if (k == 2) rn = two;
-		else if (k == 3) rn = three;
-		else if (k == 4) rn = four;
-		else if (k == 5) rn = five;
-		else if (k == 6) rn = six;
-		else if (k == 7) rn = seven;
 
 		//File pathway
 		snprintf(file, sizeof file, "%s/%d", directory, i);
@@ -717,8 +727,6 @@ int main(){
 				}
 				
 				createRoom(&rn, num);
-
-				printf("%d\n", rn.name);
 			}
 			else if (line[0] == 'C') {
 				//Get the connections for the file
@@ -740,16 +748,89 @@ int main(){
 
 				if (t == 'E') {
 					rn.type = 2;
+					finish = &rn;
 				}
 				else if (t == 'S') {
 					rn.type = 1;
+					begin = &rn;
 				}
 				else if (t == 'M') {
 					rn.type = 0;
 				}
+			}	
+		}
+
+		if (k == 1) one = rn;
+		else if (k == 2) two = rn;
+		else if (k == 3) three = rn;
+		else if (k == 4) four = rn;
+		else if (k == 5) five = rn;
+		else if (k == 6) six = rn;
+		else if (k == 7) seven = rn;
+
+		fclose(afile);
+	}
+
+	//Game
+	//store # of steps
+	int steps = 0;
+
+	//store path
+	int path[100];
+
+	//set current location to start
+	struct Room * cur = begin;
+
+	//print current room
+	while(cur != finish) {
+		int valid;
+		int rmNum;
+
+		do {
+		printRoom(cur);
+
+		//Ask for input
+		printf("WHERE TO?>");
+		char number[3];
+		fgets(number, 3, stdin); 
+		rmNum = atoi(number);
+
+		printf("\n");
+
+		//Check that the user entered avalid room
+		valid = 0;
+		int j;
+		for (j = 0; j < cur->numConnections; j++) {
+			if (cur->connections[j] == rmNum) {
+				valid = 1;
 			}
 		}
 
-		fclose(afile);
+		if(valid == 0) {
+			printf("HUH? I DON'T UNDERSTAND THAT ROOM. TRY AGAIN.\n\n"); 
+		}
+		} while (valid == 0);
+
+		//Add number to path
+		path[steps] = rmNum;
+		
+		printf("rm: %d\n", rmNum); 
+		if(one.name == rmNum) cur = &one;	
+		else if(two.name == rmNum) cur = &two;
+		else if(three.name == rmNum) cur = &three;
+		else if(four.name == rmNum) cur = &four;
+		else if(five.name == rmNum) cur = &five;
+		else if(six.name == rmNum) cur = &six;
+		else if(seven.name == rmNum) cur = &seven;
+
+		steps++;
+
+		printRoom(cur);
+	}
+
+	printf("YOU HAVE FOUND THE END ROOM. CONGRATULATIONS!\n");
+	printf("YOU TOOK %d STEPS. YOUR PATH TO VICTORY WAS:\n", steps);
+	for (i = 0; i < steps; i++) {
+		printf("%d\n", path[steps]);
 	}
 }
