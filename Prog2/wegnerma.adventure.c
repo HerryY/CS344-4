@@ -782,7 +782,7 @@ int main(){
 	struct Room * cur = begin;
 
 	//print current room
-	while(cur != finish) {
+//	while(cur != finish) {
 		int valid;
 		int rmNum;
 
@@ -826,11 +826,11 @@ int main(){
 		steps++;
 
 		printRoom(cur);
-	}
+//	}
 
 	printf("YOU HAVE FOUND THE END ROOM. CONGRATULATIONS!\n");
 	printf("YOU TOOK %d STEPS. YOUR PATH TO VICTORY WAS:\n", steps);
 	for (i = 0; i < steps; i++) {
-		printf("%d\n", path[steps]);
+		printf("%d\n", path[i]);
 	}
 }
