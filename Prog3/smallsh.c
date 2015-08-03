@@ -187,7 +187,6 @@ int main() {
 				else {
                     //print pid if process is in bg
                     printf("background pid: %d\n", pid);
-					break;
                 }
             }
         }
