@@ -114,99 +114,99 @@ int main() {
                 chdir(args[1]);
             }
         } 
-//		else { //other commands
-//            //fork command
-//            pid = fork();
-//            if (pid == 0) {  //Child  
-//                if (iFile != NULL) { //If there is a file to input to
-//                    //open specified file
-//                    fd = open(iFile, O_RDONLY);
-//                    if (fd == -1) {
-//						//Invalid file, exit
-//                        printf("Invalid file: %s\n", iFile);
-//						fflush(stdout);
-//                        _Exit(1);
-//                    }
-//                    else if (dup2(fd, 0) == -1) {
-//						//Error redirecting input
-//                        perror("dup2 error");
-//                        _Exit(1);
-//                    }
-//                    close(fd);
-//                } 
-//				else if (bg) {
-//                    //redirect input to /dev/null if input file not specified
-//                    fd = open("/dev/null", O_RDONLY);
-//                    if (fd == -1) {
-//						//error opening
-//                        perror("open error");
-//                        _Exit(1);
-//                    }
-//                    else if (dup2(fd, 0) == -1) {
-//                        perror("dup2 error");
-//                        _Exit(1);
-//                    }
-//					close(fd);
-//                }
-//                
-//                if (oFile != NULL) { //If there is a file to output to
-//                    //open specified file
-//                    fd = open(oFile, O_WRONLY | O_CREAT | O_TRUNC, 0744);
-//                    if (fd == -1) {
-//						//Error opening file, exit
-//                        printf("Invalid file: %s\n", oFile);
-//                        fflush(stdout);
-//                        _Exit(1);
-//                    }
-//                    if (dup2(fd, 1) == -1) { //Redirect output
-//						//Error redirecting
-//                        perror("dup2 error");
-//                        _Exit(1);
-//                    }
-//                    close(fd);
-//                }
-//                
-//				//exec command stored in arg[0]
-//                if (execvp(args[0], args)) {
-//					//Command not recognized error, exit
-//                    printf("Command not recognized: \n", args[0]);
-//                    fflush(stdout);
-//                    _Exit(1);
-//				}
-//            }
-//			else if (pid < 0) { //fork() error
-//                perror("fork error");
-//                status = 1;
-//				break;
-//			}
-//			else { //Parent
-//                if (!bg) {
-//                    //wait for the foreground process to complete
-//                    waitpid(pid, &status, 0);
-//                } 
-//				else {
-//                    //print pid if process is in bg
-//                    printf("background pid: %d\n", pid);
-//					break;
-//                }
-//            }
-//        }
-//		
-//        //free arg array to reuse for next line
-//        for (i = 0; i < numArgs; i++) {
-//            args[i] = NULL;
-//        }
-//
-//		//Free files
-//        iFile = NULL;
-//        oFile = NULL;
-//
-//        //bg processes finished?
-//        pid = waitpid(-1, &status, WNOHANG);
-//        while (pid > 0) {
-//            printf("background pid complete: %d\n", pid);
-//            pid = waitpid(-1, &status, WNOHANG);
-//        }
+		else { //other commands
+            //fork command
+            pid = fork();
+            if (pid == 0) {  //Child  
+                if (iFile != NULL) { //If there is a file to input to
+                    //open specified file
+                    fd = open(iFile, O_RDONLY);
+                    if (fd == -1) {
+						//Invalid file, exit
+                        printf("Invalid file: %s\n", iFile);
+						fflush(stdout);
+                        _Exit(1);
+                    }
+                    else if (dup2(fd, 0) == -1) {
+						//Error redirecting input
+                        perror("dup2 error");
+                        _Exit(1);
+                    }
+                    close(fd);
+                } 
+				else if (bg) {
+                    //redirect input to /dev/null if input file not specified
+                    fd = open("/dev/null", O_RDONLY);
+                    if (fd == -1) {
+						//error opening
+                        perror("open error");
+                        _Exit(1);
+                    }
+                    else if (dup2(fd, 0) == -1) {
+                        perror("dup2 error");
+                        _Exit(1);
+                    }
+					close(fd);
+                }
+                
+                if (oFile != NULL) { //If there is a file to output to
+                    //open specified file
+                    fd = open(oFile, O_WRONLY | O_CREAT | O_TRUNC, 0744);
+                    if (fd == -1) {
+						//Error opening file, exit
+                        printf("Invalid file: %s\n", oFile);
+                        fflush(stdout);
+                        _Exit(1);
+                    }
+                    if (dup2(fd, 1) == -1) { //Redirect output
+						//Error redirecting
+                        perror("dup2 error");
+                        _Exit(1);
+                    }
+                    close(fd);
+                }
+                
+				//exec command stored in arg[0]
+                if (execvp(args[0], args)) {
+					//Command not recognized error, exit
+                    printf("Command not recognized: \n", args[0]);
+                    fflush(stdout);
+                    _Exit(1);
+				}
+            }
+			else if (pid < 0) { //fork() error
+                perror("fork error");
+                status = 1;
+				break;
+			}
+			else { //Parent
+                if (!bg) {
+                    //wait for the foreground process to complete
+                    waitpid(pid, &status, 0);
+                } 
+				else {
+                    //print pid if process is in bg
+                    printf("background pid: %d\n", pid);
+					break;
+                }
+            }
+        }
+		
+        //free arg array to reuse for next line
+        for (i = 0; i < numArgs; i++) {
+            args[i] = NULL;
+        }
+
+		//Free files
+        iFile = NULL;
+        oFile = NULL;
+
+        //bg processes finished?
+        pid = waitpid(-1, &status, WNOHANG);
+        while (pid > 0) {
+            printf("background pid complete: %d\n", pid);
+            pid = waitpid(-1, &status, WNOHANG);
+        }
    }    
 
     return 0;
