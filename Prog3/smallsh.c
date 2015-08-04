@@ -15,7 +15,6 @@
 #include<signal.h>
 #include<sys/stat.h>
 
-
 int main() {
 	char* line = NULL;
 	char* args[513];
@@ -26,13 +25,13 @@ int main() {
 	int fd;
 	int bg;
 	int status = 0;
-	int pid;
+	int  pid;
 	int exited = 0;
 	int i;
 
 	//signal handler to ignore SIGINT
 	struct sigaction act;
-	act.sa_handler = SIG_IGN;
+	act.sa_handler = SIG_IGN; //set to ignore
 	sigaction(SIGINT, &act, NULL);
 
 	while (!exited) {
@@ -51,46 +50,47 @@ int main() {
         
 	//split line into tokens
         numArgs = 0;
-        token = strtok(line, "  \n");
+        token = strtok(line, "  \n"); //get initial token
+
         while (token != NULL) {
 	//printf("token: %s\n", token);
             if (strcmp(token, "<") == 0) {
                 //input file
-				//Get file name
+		//Get file name
                 token = strtok(NULL, " \n");
                 iFile = strdup(token);
 
 		//Get next token
                 token = strtok(NULL, " \n");
             } 
-			else if (strcmp(token, ">") == 0) {
+  	    else if (strcmp(token, ">") == 0) {
                 //output file
-				//Get the file name
+		//Get the file name
                 token = strtok(NULL, " \n");
                 oFile =  strdup(token);
 
-				//Get next arg
+		//Get next arg
                 token = strtok(NULL, " \n");
             } 
-			else if (strcmp(token, "&") == 0) {
+	    else if (strcmp(token, "&") == 0) {
                 //command in background
-                bg = 1;
+                bg = 1; //set bg variable
                 break;
             } 
-			else {
+	    else {
                 //this is a command or arg - store in array
                 args[numArgs] = strdup(token);
 
-				//get next token
+		//get next token
                 token = strtok(NULL, " \n");
-                numArgs++;
+                numArgs++; //increment # args
             }
         }
 
 	//End array of args with NULL
         args[numArgs] = NULL;
         //Determine command
-		//Comment or NULL
+	//Comment or NULL
         if (args[0] == NULL || !(strncmp(args[0], "#", 1))) {
             //if comment or null - do nothing
         } 
@@ -103,12 +103,13 @@ int main() {
 		if (WIFEXITED(status)) {//print exit status
 			printf("Exit status: %d\n", WEXITSTATUS(status));
 		}
-		else { //Print terminating signal
+		else { //else print terminating signal
 			printf("Terminating signal %d\n", status);				}
 	}
 	else if (strcmp(args[0], "cd") == 0) { //cd command
-		//If there is not arg for cd
+		//If there is not arg for cd command
             	if (args[1] == NULL) {
+			//Go to HOME directory
                		chdir(getenv("HOME"));
            	} 
 		else {//Else change to specified dir
@@ -116,28 +117,29 @@ int main() {
             	}
        	}	 
 	else { //other commands
-            	//fork command
+                //fork command
             	pid = fork();
 
             	if (pid == 0) {  //Child 
  	  	   if(!bg) { //If the process is not background
 			//command can be interrupted
-			act.sa_handler = SIG_DFL;
+			act.sa_handler = SIG_DFL; //set to default
 			act.sa_flags = 0;
 			sigaction(SIGINT, &act, NULL);
 		   }
 
 
-                   if (iFile != NULL) { //If file to input to
+                   if (iFile != NULL) { //If file to input to given
                     	//open specified file
                     	fd = open(iFile, O_RDONLY);
+
                     	if (fd == -1) {
 				//Invalid file, exit
                         	fprintf(stderr, "Invalid file: %s\n", iFile);
 				fflush(stdout);
                        		exit(1);
                    	}
-                   	else if (dup2(fd, 0) == -1) {
+                   	else if (dup2(fd, 0) == -1) { //redirect input 
 				//Error redirecting input
                         	fprintf(stderr, "dup2 error");
                        		exit(1);
@@ -150,12 +152,14 @@ int main() {
                     	//redirect input to /dev/null 
                     	//if input file not specified
                     	fd = open("/dev/null", O_RDONLY);
+
                     	if (fd == -1) {
 				//error opening
                         	fprintf(stderr, "open error");
                        		exit(1);
                    	}
-                    	else if (dup2(fd, 0) == -1) {
+                    	else if (dup2(fd, 0) == -1) { //redirect input
+				//Error redirecting
                         	fprintf(stderr, "dup2 error");
                        		exit(1);
                    	}
@@ -163,7 +167,7 @@ int main() {
 			//Close file stream		
 			close(fd);
                      }
-                     else  if (oFile != NULL) { //If file to output to
+                     else  if (oFile != NULL) { //If file to output to given
                     	//open specified file
                     	fd = open(oFile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
                     
@@ -185,22 +189,26 @@ int main() {
                      }
                 
 		     //exec command stored in arg[0]
-                     if (execvp(args[0], args)) {
+                     if (execvp(args[0], args)) { //execute
 			//Command not recognized error, exit
                     	fprintf(stderr, "Command not recognized: %s\n", args[0]);
                     	fflush(stdout);
                    	exit(1);
 		      }
                  }
-		else if (pid < 0) { //fork() error
+		else if (pid < 0) { //fork() error if pid < 0
+			//print error msg
         	        fprintf(stderr, "fork error");
                 	status = 1;
 			break;
 		}
 		else { //Parent
-	                if (!bg) {
+	                if (!bg) { //if not in background
         	            //wait for the foreground process to complete
-                	    waitpid(pid, &status, 0);
+                	   do {
+			printf("pid: %d\n", pid);
+			   waitpid(pid, &status, 0);
+			   } while (!WIFEXITED(status) && !WIFSIGNALED(status));
                 	} 
 			else {
                    	    //print pid if process is in bg
@@ -221,7 +229,7 @@ int main() {
         //bg processes finished?
         //Check to see if anything has died
         pid = waitpid(-1, &status, WNOHANG);
-        if (pid > 0) {
+        while (pid > 0) {
 	    //Print that process is complete
             printf("background pid complete: %d\n", pid);
 	   
@@ -231,6 +239,8 @@ int main() {
 	    else { //If the process was terminated by a signal
 		printf("Terminating signal: %d\n", status);
 	    }
+
+	    pid = waitpid(-1, &status, WNOHANG);
         }
    }    
 
