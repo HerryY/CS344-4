@@ -133,13 +133,13 @@ int main() {
                     	fd = open(iFile, O_RDONLY);
                     	if (fd == -1) {
 				//Invalid file, exit
-                        	printf("Invalid file: %s\n", iFile);
+                        	fprintf(stderr, "Invalid file: %s\n", iFile);
 				fflush(stdout);
                        		exit(1);
                    	}
                    	else if (dup2(fd, 0) == -1) {
 				//Error redirecting input
-                        	perror("dup2 error");
+                        	fprintf(stderr, "dup2 error");
                        		exit(1);
                    	}
                    		
@@ -152,11 +152,11 @@ int main() {
                     	fd = open("/dev/null", O_RDONLY);
                     	if (fd == -1) {
 				//error opening
-                        	perror("open error");
+                        	fprintf(stderr, "open error");
                        		exit(1);
                    	}
                     	else if (dup2(fd, 0) == -1) {
-                        	perror("dup2 error");
+                        	fprintf(stderr, "dup2 error");
                        		exit(1);
                    	}
 			
@@ -169,14 +169,14 @@ int main() {
                     
 			if (fd == -1) {
 				//Error opening file, exit
-                        	printf("Invalid file: %s\n", oFile);
+                        	fprintf(stderr, "Invalid file: %s\n", oFile);
                         	fflush(stdout);
                        		exit(1);
                    	}
 
 	                if (dup2(fd, 1) == -1) { //Redirect output
 				//Error redirecting
-        	                perror("dup2 error");
+        	                fprintf(stderr, "dup2 error");
                 	       	exit(1);
                    	}
 
@@ -187,13 +187,13 @@ int main() {
 		     //exec command stored in arg[0]
                      if (execvp(args[0], args)) {
 			//Command not recognized error, exit
-                    	printf("Command not recognized: \n", args[0]);
+                    	fprintf(stderr, "Command not recognized: %s\n", args[0]);
                     	fflush(stdout);
                    	exit(1);
 		      }
                  }
 		else if (pid < 0) { //fork() error
-        	        perror("fork error");
+        	        fprintf(stderr, "fork error");
                 	status = 1;
 			break;
 		}
@@ -219,8 +219,9 @@ int main() {
         oFile = NULL;
 
         //bg processes finished?
+        //Check to see if anything has died
         pid = waitpid(-1, &status, WNOHANG);
-        while (pid > 0) {
+        if (pid > 0) {
 	    //Print that process is complete
             printf("background pid complete: %d\n", pid);
 	   
@@ -230,8 +231,6 @@ int main() {
 	    else { //If the process was terminated by a signal
 		printf("Terminating signal: %d\n", status);
 	    }
-
-            pid = waitpid(-1, &status, WNOHANG);
         }
    }    
 
