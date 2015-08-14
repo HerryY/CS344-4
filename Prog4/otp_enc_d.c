@@ -12,15 +12,18 @@
 #include<sys/socket.h>
 #include<sys/wait.h>
 #include<fcntl.h>
+#include<netinet/in.h>
 
 int main(int argc, char* argv[]) {
-   int ilisteningPort;   
+   int listeningPort;   
    int socketfd;
    struct sockaddr_in server;
    struct sockaddr_in client;
    int clientSockfd;
+   int pid;
+   char buf[64];
 
-   if(argv < 2) { //port # is not specified
+   if(argc < 2) { //port # is not specified
 	printf("You must include a port number\n");
 	exit(1);
    }
@@ -37,7 +40,7 @@ int main(int argc, char* argv[]) {
    }
  
      //bind socket to a port
-   if(bind(socketfd, (sruct sockaddr *) &server, sizeof(server)) == -1) {
+   if(bind(socketfd, (struct sockaddr *) &server, sizeof(server)) == -1) {
 	//If error binding
 	perror("bind");
 	exit(1);
@@ -49,7 +52,7 @@ int main(int argc, char* argv[]) {
    server.sin_port = htons(listeningPort);
   
    //Listen for connections
-   if(listen(sockfd, 5) == -1) {
+   if(listen(socketfd, 5) == -1) {
 	//If error listening
 	perror("listen");
 	exit(1);
@@ -57,8 +60,9 @@ int main(int argc, char* argv[]) {
 
     while(1) {
 	//Accept connections
+	int clieSize = sizeof(client); 
 	clientSockfd = 
-	accept(sockfd, (struct sockaddr *) &client, sizeof(client));
+	accept(socketfd, (struct sockaddr *) &client, &clieSize);
 
 	//If error accepting
 	if (clientSockfd == -1) {
@@ -72,7 +76,9 @@ int main(int argc, char* argv[]) {
 	   perror("fork");
 	}
 	else if(pid == 0) { //child
-	  
+	   close(socketfd);
+
+	   	   	  
 	}
 	else { //Parent
 
