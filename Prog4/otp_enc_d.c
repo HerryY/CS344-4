@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
    }
 
    //create socket to listen to
-   if (socketfd = socket(AF_INET, SOCK_STREAM, 0) == -1) { //Create
+   if ((socketfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) { //Create
 	//If error creating
 	perror("socket");
 	exit(1);

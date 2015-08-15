@@ -46,14 +46,14 @@ int main(int argc, char* argv[]) {
    }
 
    //create socket to listen to
-   if (socketfd = socket(AF_INET, SOCK_STREAM, 0) == -1) { //Create
+   if ((socketfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) { //Create
 	//If error creating
 	perror("socket");
 	exit(1);
    }
  
      //bind socket to a port
-   if(bind(socketfd, (struct sockaddr *) &server, sizeof(server)) == -1) {
+   if((bind(socketfd, (struct sockaddr *) &server, sizeof(server))) == -1) {
 	//If error binding
 	perror("bind");
 	exit(1);
