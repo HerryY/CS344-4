@@ -36,7 +36,7 @@ int main (int argc, char* argv[]) {
 
    //open plain text and key files for reading
    fdPlain = open(argv[1], O_RDONLY);
-   fdKey = open(argv[1], O_RDONLY);
+   fdKey = open(argv[2], O_RDONLY);
    
    //check that there was not an error opening
    if(fdPlain == -1 || fdKey == -1) {
@@ -48,18 +48,21 @@ int main (int argc, char* argv[]) {
    port = atoi(argv[3]);
 
    //check for valid chars
-   while(read(fdPlain, buffer, 1)) {
+   while(read(fdPlain, buffer, 1) != 0) {
 	c = buffer[0];
 
-	if (c != ' ' && c < 'A' || c > 'Z') {
+	if (c != ' ' && (c < 'A' || c > 'Z')) {
+	if (c != '\n') {
+	   printf("c: %c\n", c);
 	   perror("Plaintext invalid chars");
 	   exit(1);
+	}
  	}
    }
 
    //check that key right length
    int plainLen = lseek(fdPlain, 0, SEEK_END); //length of plaintext
-   if (lseek(fdKey, 0, SEEK_END < plainLen)) {//compare plain len to key len
+   if (lseek(fdKey, 0, SEEK_END) < plainLen) {//compare plain len to key len
 	perror("Key too short");
 	exit(1);
    }

@@ -36,7 +36,7 @@ int main (int argc, char* argv[]) {
 
    //open cipher text and key files for reading
    fdCipher = open(argv[1], O_RDONLY);
-   fdKey = open(argv[1], O_RDONLY);
+   fdKey = open(argv[2], O_RDONLY);
    
    //check that there was not an error opening
    if(fdCipher == -1 || fdKey == -1) {
@@ -51,15 +51,17 @@ int main (int argc, char* argv[]) {
    while(read(fdCipher, buffer, 1)) {
 	c = buffer[0];
 
-	if (c != ' ' && c < 'A' || c > 'Z') {
+	if(c != '\n') {
+	if (c != ' ' && (c < 'A' || c > 'Z')) {
 	   perror("ciphertext invalid chars");
 	   exit(1);
  	}
+	}
    }
 
    //check that key right length
    int cipherLen = lseek(fdCipher, 0, SEEK_END); //length of plaintext
-   if (lseek(fdKey, 0, SEEK_END < cipherLen)) {//compare plain len to key len
+   if (lseek(fdKey, 0, SEEK_END) < cipherLen) {//compare plain len to key len
 	perror("Key too short");
 	exit(1);
    }
