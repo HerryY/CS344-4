@@ -16,15 +16,19 @@
 #include<netdb.h>
 
 int main (int argc, char* argv[]) {
+   int i;
    int fdPlain;
    int fdKey;
    int port;
-   char buffer[64];
+   char buffer[1024];
    char message[] = "enc";
    char c;
    int socketfd;
    struct hostent *server_ip_address;
    struct sockaddr_in server;
+   int length;
+   int r;
+   int w;
 
    if (argc < 4) {
 	fprintf(stderr, "Must specify plaintext, key, and port number\n");
@@ -94,6 +98,98 @@ int main (int argc, char* argv[]) {
    	exit(2);
    }
 
+   //send plain text file
+   //get length of file
+   length = lseek(fdPlain, 0, SEEK_END);
+      
+   //set file ptr to beginning
+   lseek(fdPlain, 0, SEEK_SET);
+
+   //send length of file
+   write(socketfd, &length, sizeof(int));
+   
+
+   //send the file
+   //get part of the file
+   while((r = read(fdPlain, buffer, sizeof(buffer))) > 0) {
+	//send part of the file
+	for (i = 0; i < r; i += w) {//write part of file until amount sent
+				    //is equal to amount to send
+	   //write
+	   w = write(socketfd, buffer + i, r - i);
+
+	   if (w < 0) { //unable to write
+		perror("write");
+		exit(1);
+	   }
+	}
+   }
+
+   //reset buffer
+   memset(buffer, '\0', sizeof(buffer));
+
+   //get confirmation that file received
+   if ((r =  read(socketfd, buffer, sizeof(buffer))) < 0) {
+	perror("confirmation");
+   }
+   if (strcmp(buffer, "received") != 0) {
+	perror("confirmation");
+	exit(1);
+   }  	
+   
+    //send key file
+   //get length of file
+   length = lseek(fdKey, 0, SEEK_END);
+      
+   //set file ptr to beginning
+   lseek(fdKey, 0, SEEK_SET);
+
+   //send length of file
+   write(socketfd, &length, sizeof(int));
+   
+
+   //send the file
+   //get part of the file
+   while((r = read(fdKey, buffer, sizeof(buffer))) > 0) {
+	//send part of the file
+	for (i = 0; i < r; i += w) {//write part of file until amount sent
+				    //is equal to amount to send
+	   //write
+	   w = write(socketfd, buffer + i, r - i);
+
+	   if (w < 0) { //unable to write
+		perror("write");
+		exit(1);
+	   }
+	}
+   }
+
+   //reset buffer
+   memset(buffer, '\0', sizeof(buffer));
+
+   //get confirmation that file received
+   if ((r =  read(socketfd, buffer, sizeof(buffer))) < 0) {
+	perror("confirmation");
+   }
+   if (strcmp(buffer, "received") != 0) {
+	perror("confirmation");
+	exit(1);
+   }
+
+   //get cipher file and print
+   for(i = 0; i < plainLen; i += r) {
+	//get part of cipher file
+	if ((r = read(socketfd, buffer, sizeof(buffer) - 1))  < 0) {
+	   //error reading file
+	   perror("cipher read");
+	   exit(1);
+	}
+	else {
+	   buffer[r] = '\0'; //null terminate string
+	   printf("%s", buffer); //print string received from cipher file 
+ 	}
+   }
+	
    return 0;
 }
 
