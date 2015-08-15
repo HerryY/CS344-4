@@ -91,8 +91,8 @@ int main (int argc, char* argv[]) {
    }
 
    //confirm connection
-   write(socketfd, message, sizeof(message));
-   read(socketfd, buffer, sizeof(buffer));
+   write(socketfd, message, sizeof(message));//send confirmation message
+   read(socketfd, buffer, sizeof(buffer)); //receive confirmation message
    if (strcmp(buffer, "enc_d") != 0) {
 	fprintf(stderr, "could not contact otp_enc_d on port %d\n", port); 
    	exit(2);
@@ -111,7 +111,9 @@ int main (int argc, char* argv[]) {
 
    //send the file
    //get part of the file
-   while((r = read(fdPlain, buffer, sizeof(buffer))) > 0) {
+   while((r = read(fdPlain, buffer, sizeof(buffer))) > 0) {//keep sending
+							   //until whole file
+							   //is sent
 	//send part of the file
 	for (i = 0; i < r; i += w) {//write part of file until amount sent
 				    //is equal to amount to send
@@ -130,9 +132,11 @@ int main (int argc, char* argv[]) {
 
    //get confirmation that file received
    if ((r =  read(socketfd, buffer, sizeof(buffer))) < 0) {
-	perror("confirmation");
+	//error reading
+	perror("read confirmation");
    }
    if (strcmp(buffer, "received") != 0) {
+	//error being received
 	perror("confirmation");
 	exit(1);
    }  	
