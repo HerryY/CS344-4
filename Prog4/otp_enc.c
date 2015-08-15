@@ -13,16 +13,21 @@
 #include<sys/wait.h>
 #include<fcntl.h>
 #include<netinet/in.h>
+#include<netdb.h>
 
 int main (int argc, char* argv[]) {
    int fdPlain;
    int fdKey;
    int port;
    char buffer[64];
+   char message[] = "enc";
    char c;
+   int socketfd;
+   struct hostent *server_ip_address;
+   struct sockaddr_in server;
 
    if (argc < 4) {
-	printf("Must specify plaintext, key, and port number\n");
+	fprintf(stderr, "Must specify plaintext, key, and port number\n");
    }
 
    //open plain text and key files for reading
@@ -55,6 +60,39 @@ int main (int argc, char* argv[]) {
 	exit(1);
    }
    
+   //create socket
+   if((socketfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+	//Error if can't create
+	perror("socket");
+	exit(1);
+   }
+
+   //Setting up address
+    server_ip_address = gethostbyname("localhost");
+
+   if(server_ip_address == NULL) {
+	fprintf(stderr, "could not resolve host name\n");
+	exit(1);
+   }
+
+   //Fill in address struct
+   server.sin_family = AF_INET;
+   server.sin_port = htons(port);
+   memcpy(&server.sin_addr, server_ip_address->h_addr, server_ip_address->h_length);
+
+   //Connect to socket
+   if((connect(socketfd, (struct sockaddr*) &server, sizeof(server))) == -1) {
+	perror("connect");
+	exit(2);
+   }
+
+   //confirm connection
+   write(socketfd, message, sizeof(message));
+   read(socketfd, buffer, sizeof(buffer));
+   if (strcmp(buffer, "enc_d") != 0) {
+	fprintf(stderr, "could not contact otp_enc_d on port %d\n", port); 
+   	exit(2);
+   }
 
    return 0;
 }
