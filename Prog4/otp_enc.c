@@ -10,16 +10,16 @@
 #include<unistd.h>
 #include<sys/types.h>
 #include<sys/socket.h>
-#include<sys/wait.h>
 #include<fcntl.h>
 #include<netinet/in.h>
+#include<netdb.h>
 #include<netdb.h>
 
 int main (int argc, char* argv[]) {
    int i;
    int fdPlain;
    int fdKey;
-   int port;
+   int portno;
    char buffer[1024];
    char message[] = "enc";
    char c;
@@ -32,6 +32,7 @@ int main (int argc, char* argv[]) {
 
    if (argc < 4) {
 	fprintf(stderr, "Must specify plaintext, key, and port number\n");
+	exit(1);
    }
 
    //open plain text and key files for reading
@@ -45,7 +46,7 @@ int main (int argc, char* argv[]) {
    }
 
    //get port number form args
-   port = atoi(argv[3]);
+   portno = atoi(argv[3]);
 
    //check for valid chars
    while(read(fdPlain, buffer, 1) != 0) {
@@ -53,7 +54,7 @@ int main (int argc, char* argv[]) {
 
 	if (c != ' ' && (c < 'A' || c > 'Z')) {
 	if (c != '\n') {
-	   printf("c: %c\n", c);
+	   printf("c: %c\n", buffer[0]);
 	   perror("Plaintext invalid chars");
 	   exit(1);
 	}
@@ -66,14 +67,7 @@ int main (int argc, char* argv[]) {
 	perror("Key too short");
 	exit(1);
    }
-   
-   //create socket
-   if((socketfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-	//Error if can't create
-	perror("socket");
-	exit(1);
-   }
-
+ 
    //Setting up address
     server_ip_address = gethostbyname("localhost");
 
@@ -84,11 +78,18 @@ int main (int argc, char* argv[]) {
 
    //Fill in address struct
    server.sin_family = AF_INET;
-   server.sin_port = htons(port);
+   server.sin_port = htons(portno);
    memcpy(&server.sin_addr, server_ip_address->h_addr, server_ip_address->h_length);
-
+ 
+   //create socket
+   if((socketfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+	//Error if can't create
+	perror("socket");
+	exit(1);
+   }
+ 
    //Connect to socket
-   if((connect(socketfd, (struct sockaddr*) &server, sizeof(server))) == -1) {
+   if(connect(socketfd, (struct sockaddr*) &server, sizeof(server)) < 0) {
 	perror("connect");
 	exit(2);
    }
@@ -97,7 +98,7 @@ int main (int argc, char* argv[]) {
    write(socketfd, message, sizeof(message));//send confirmation message
    read(socketfd, buffer, sizeof(buffer)); //receive confirmation message
    if (strcmp(buffer, "enc_d") != 0) {
-	fprintf(stderr, "could not contact otp_enc_d on port %d\n", port); 
+	fprintf(stderr, "could not contact otp_enc_d on port %d\n", portno); 
    	exit(2);
    }
 

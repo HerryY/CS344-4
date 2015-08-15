@@ -51,6 +51,11 @@ int main(int argc, char* argv[]) {
 	perror("socket");
 	exit(1);
    }
+
+    //Fill in socket address sruct
+   server.sin_family = AF_INET;
+   server.sin_addr.s_addr = INADDR_ANY;
+   server.sin_port = htons(listeningPort);
  
      //bind socket to a port
    if((bind(socketfd, (struct sockaddr *) &server, sizeof(server))) == -1) {
@@ -58,11 +63,6 @@ int main(int argc, char* argv[]) {
 	perror("bind");
 	exit(1);
    }
-
-    //Fill in socket address sruct
-   server.sin_family = AF_INET;
-   server.sin_addr.s_addr = INADDR_ANY;
-   server.sin_port = htons(listeningPort);
   
    //Listen for connections
    if((listen(socketfd, 5)) == -1) {
