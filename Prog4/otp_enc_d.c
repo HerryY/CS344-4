@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
    }
  
      //bind socket to a port
-   if(bind(socketfd, (struct sockaddr *) &server, sizeof(server)) == -1) {
+   if((bind(socketfd, (struct sockaddr *) &server, sizeof(server))) == -1) {
 	//If error binding
 	perror("bind");
 	exit(1);
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
    server.sin_port = htons(listeningPort);
   
    //Listen for connections
-   if(listen(socketfd, 5) == -1) {
+   if((listen(socketfd, 5)) == -1) {
 	//If error listening
 	perror("listen");
 	exit(1);

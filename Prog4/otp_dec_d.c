@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
    server.sin_port = htons(listeningPort);
   
    //Listen for connections
-   if(listen(socketfd, 5) == -1) {
+   if((listen(socketfd, 5)) == -1) {
 	//If error listening
 	perror("listen");
 	exit(1);

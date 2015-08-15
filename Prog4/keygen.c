@@ -39,6 +39,9 @@ int main(int argc, char* argv[]){
 	}
    }
 
+   //add newline to end 
+   printf("\n");
+
    return 0;
 }
 
