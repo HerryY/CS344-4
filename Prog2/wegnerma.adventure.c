@@ -63,14 +63,12 @@ void updateConnection (struct Room *s, int connection) {
 		return;
 	   }
 	}
-printf("NAME: %d\n", s->name);
-printf("Con sent: %d\n", connection);
+
 	//Else update connections
 	s->connections[s->numConnections] = connection;
-printf("Con put in: %d\n", s->connections[s->numConnections]);
+
 	//Update # of connections
 	s->numConnections++;
-printf("Num connections: %d\n", s->numConnections);
    }
 }
 
@@ -123,20 +121,21 @@ int main(){
    //Array of room names
    int roomArr[7];
 
-   //Array of rooms
+   //Array of Room structs
    struct Room rooms[7];
 
-   //Room variable
+   //Room variable - to use to create room
    struct Room room;
 
-   //Select and create rooms
+   //Select name and create rooms
+   //Names are random 7 numbers between 1 and 10
    for (i = 0; i < 7; i++) {
 	int unique = 0;
 	int roomNum;
 
 	//Geneate random room number 
 	//If room number is already taken
-	//regenearte rand number until a unique
+	//regenerate rand number until a unique
 	//number is found
 	while (!unique) {
 	   //Generate room number
@@ -162,7 +161,8 @@ int main(){
 	rooms[i] = room;
    }    
 
-   //Second room variable
+   //Second room variable - used to create
+   //connections between two rooms
    struct Room room2;
 
    //Create connections
@@ -171,8 +171,9 @@ int main(){
 	room = rooms[i]; //current room
 	int roomNum = roomArr[i]; //current room name
 
+	//Create at least 3 connections for each room
 	while (room.numConnections < 3) {
-	   int rnd = i;
+	   int rnd = i;//rnd set to current room
 	   int r;
 
 	   while (rnd == i) {//While rnd is equal to the 
@@ -186,14 +187,14 @@ int main(){
 
 		//Search for previous connection
 		for(j = 0; j < room.numConnections; j++) {
-		   if (room.connections[j] == r) { //If the room 
-						   //already 
+		   if (room.connections[j] == r) { //If the rooms 
+						   //are already 
 						   //connected no 
 						   //conection made
 						   //and a new rnd
 						   //number is 
 						   //generated
-			rnd = i;
+			rnd = i;//rnd = i to repeat while loop
 		   }
 		}
 	   }
@@ -226,7 +227,7 @@ int main(){
    room = rooms[startRand]; //Find room in rooms array
 
    //Set room to start room
-   room.type = 1;
+   room.type = 1; //type 2 == start
 
    //store start room back in array
    rooms[startRand] = room;
@@ -242,7 +243,7 @@ int main(){
 
    //If start and end are not same set room to end room
    room = rooms[endRand];
-   room.type = 2;
+   room.type = 2; //type 2 == end
 
    //store end room back in array
    rooms[endRand] = room;
@@ -342,14 +343,14 @@ int main(){
 				     //a connection
 		//Get the connections for the file
 		//Determine the room number
-		char num = line[11] - 48;
+		char num = line[14] - 48;
 
 		if (num == 1) {//Check if num is 1 or 10
-		   if(line[12] == 48) {
+		   if(line[15] == 48) {
 			num = 10;
 		   }
 		}
-	
+
 		//Update room with connection
 		updateConnection(&rn, num);
 	   }
@@ -368,7 +369,7 @@ int main(){
 	   }
 	}
 
-	//Store room in game room arry
+	//Store room in game room array
 	gameRooms[k] = rn;
 
 	//Close file
@@ -385,20 +386,20 @@ int main(){
    //Set current location to start
    struct Room * cur = &begin;
 
-   //print current room 
+   //Play
    while(cur->type != 2) {//while the room
 			  //is not the end room
 	int valid;
 	int rmNum;
 
 	do {
-	   //Print room
+	   //Print current room
 	   printRoom(cur);
 
 	   //Ask user for input
 	   printf("WHERE TO?>");
 	   char number[3];
-	   fgets(number, 3, stdin);//Get input
+	   fgets(number, 3, stdin);//Get input as string
 	   rmNum = atoi(number);//Change input to int
 
 	   printf("\n");
@@ -411,25 +412,26 @@ int main(){
 		//Search through connections
 		//for valid input
 		if (cur->connections[j] == rmNum) {
-		   valid = 1;
+		   valid = 1;//If in connections, is valid
 		}
 	   }
 
 	   //If input is not a valid number
 	   //print error message
-	   if(valid = 0) {
+	   if(valid == 0) {
 		printf("HUH? I DON'T UNDERSTAND THAT ROOM. TRY AGAIN.\n\n");
 	   } 
-	} while (valid == 0);//Repat until valid input
+	} while (valid == 0);//Repeat until valid input
 
-	//Add room to parh
+	//Add chosen room to path
 	path[steps] = rmNum;
 
-	//Find room in array
+	//Find chosen room in array
 	int m;
 	for (m = 0; m < 7; m++){
 	   if(gameRooms[m].name == rmNum) {//Search through array for
 					   //room with name
+
 		cur = &gameRooms[m];//set cur room to new room
 	   }
 	}
@@ -438,6 +440,7 @@ int main(){
 	steps++;
    }
 
+   //End of game
    //When end is reached print message
    printf("YOU HAVE FOUND THE END ROOM. CONGRATULATIONS!\n");
    //Print steps
