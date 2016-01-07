@@ -398,8 +398,8 @@ int main(){
 
 	   //Ask user for input
 	   printf("WHERE TO?>");
-	   char number[3];
-	   fgets(number, 3, stdin);//Get input as string
+	   char number[4];
+	   fgets(number, 4, stdin);//Get input as string
 	   rmNum = atoi(number);//Change input to int
 
 	   printf("\n");
