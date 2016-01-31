@@ -3,7 +3,7 @@
 * Assignment #3
 * CS 344
 * Filename: smallsh.c
-* Date: 8/2/15
+* Date: 2/8/16
 ***********************************************************/
 #include<stdio.h>
 #include<stdlib.h>
@@ -35,78 +35,80 @@ int main() {
 	sigaction(SIGINT, &act, NULL);
 
 	while (!exited) {
-        bg = 0;
+           bg = 0;//background or not?
 
-	//Print prompt
-        printf(": ");     
-        fflush(stdout);     
+	   //Print prompt
+           printf(": ");     
+           fflush(stdout);     
 
-        //Read in a line 
-        ssize_t size = 0;
-	if (!(getline(&line, &size, stdin))) {
+           //Read in a line 
+           ssize_t size = 0;
+	   if (!(getline(&line, &size, stdin))) {
 		return 0; //end if this is the end of the file
-	}
-	//printf("line: %s\n", line);
+  	   }
         
-	//split line into tokens
-        numArgs = 0;
-        token = strtok(line, "  \n"); //get initial token
+	   //split line into tokens
+           numArgs = 0;
+           token = strtok(line, "  \n"); //get initial token
 
-        while (token != NULL) {
-	//printf("token: %s\n", token);
-            if (strcmp(token, "<") == 0) {
+           while (token != NULL) {
+              if (strcmp(token, "<") == 0) {
                 //input file
 		//Get file name
                 token = strtok(NULL, " \n");
-                iFile = strdup(token);
-
-		//Get next token
-                token = strtok(NULL, " \n");
-            } 
-  	    else if (strcmp(token, ">") == 0) {
-                //output file
-		//Get the file name
-                token = strtok(NULL, " \n");
-                oFile =  strdup(token);
+                iFile = strdup(token);//copy token(file name) 
+				     //to iFile variable
 
 		//Get next arg
                 token = strtok(NULL, " \n");
-            } 
-	    else if (strcmp(token, "&") == 0) {
+              } 
+  	      else if (strcmp(token, ">") == 0) {
+                //output file
+		//Get the file name
+                token = strtok(NULL, " \n");
+                oFile =  strdup(token); //copy token(file name)
+					//to oFile variable
+
+		//Get next arg
+                token = strtok(NULL, " \n");
+              } 
+	      else if (strcmp(token, "&") == 0) {
                 //command in background
-                bg = 1; //set bg variable
+                bg = 1; //set bg variable to indicate 
+			//it is in background
                 break;
-            } 
-	    else {
+              } 
+	      else {
                 //this is a command or arg - store in array
                 args[numArgs] = strdup(token);
 
 		//get next token
                 token = strtok(NULL, " \n");
                 numArgs++; //increment # args
-            }
-        }
+              }
+           }
 
-	//End array of args with NULL
-        args[numArgs] = NULL;
-        //Determine command
-	//Comment or NULL
-        if (args[0] == NULL || !(strncmp(args[0], "#", 1))) {
-            //if comment or null - do nothing
-        } 
-	else if (strcmp(args[0], "exit") == 0) { //exit command
+	   //End array of args with NULL
+           args[numArgs] = NULL;
+
+           //Determine command
+   	   //If it is comment or NULL
+           if (args[0] == NULL || !(strncmp(args[0], "#", 1))) {
+              //if comment or null - do nothing
+           } 
+	   else if (strcmp(args[0], "exit") == 0) { //exit command
             	exit(0);
 		exited = 1;
-        } 
-	else if (strcmp(args[0], "status") == 0) { //status command
+           } 
+	   else if (strcmp(args[0], "status") == 0) { //status command
 		//Print status
 		if (WIFEXITED(status)) {//print exit status
 			printf("Exit status: %d\n", WEXITSTATUS(status));
 		}
 		else { //else print terminating signal
 			printf("Terminating signal %d\n", status);				}
-	}
-	else if (strcmp(args[0], "cd") == 0) { //cd command
+	   }
+	   else if (strcmp(args[0], "cd") == 0) { //cd command
 		//If there is not arg for cd command
             	if (args[1] == NULL) {
 			//Go to HOME directory
@@ -115,8 +117,8 @@ int main() {
 		else {//Else change to specified dir
                 	chdir(args[1]);
             	}
-       	}	 
-	else { //other commands
+       	   }	 
+	   else { //other commands
                 //fork command
             	pid = fork();
 
@@ -128,9 +130,8 @@ int main() {
 			sigaction(SIGINT, &act, NULL);
 		   }
 
-
-                   if (iFile != NULL) { //If file to input to given
-                    	//open specified file
+                   if (iFile != NULL) { //If file to input is given
+                    	//open specified file read only
                     	fd = open(iFile, O_RDONLY);
 
                     	if (fd == -1) {
@@ -149,6 +150,7 @@ int main() {
 			close(fd);
                      } 
 		     else if (bg) {
+			//Else the process is in the background
                     	//redirect input to /dev/null 
                     	//if input file not specified
                     	fd = open("/dev/null", O_RDONLY);
@@ -188,26 +190,25 @@ int main() {
                     	close(fd);
                      }
                 
-		     //exec command stored in arg[0]
+		     //execute command stored in arg[0]
                      if (execvp(args[0], args)) { //execute
 			//Command not recognized error, exit
-                    	fprintf(stderr, "Command not recognized: %s\n", args[0]);
+                    	fprintf(stderr, "Command not recognized: %s\n",args[0]);
                     	fflush(stdout);
                    	exit(1);
 		      }
                  }
-		else if (pid < 0) { //fork() error if pid < 0
+		 else if (pid < 0) { //fork() error if pid < 0
 			//print error msg
         	        fprintf(stderr, "fork error");
                 	status = 1;
 			break;
-		}
-		else { //Parent
+		 }
+		 else { //Parent
 	                if (!bg) { //if not in background
-        	            //wait for the foreground process to complete
+        	           //wait for the foreground process to complete
                 	   do {
-			printf("pid: %d\n", pid);
-			   waitpid(pid, &status, 0);
+			        waitpid(pid, &status, 0);
 			   } while (!WIFEXITED(status) && !WIFSIGNALED(status));
                 	} 
 			else {
