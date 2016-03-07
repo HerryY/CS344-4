@@ -234,7 +234,7 @@ int main() {
 	    //Print that process is complete
             printf("background pid complete: %d\n", pid);
 	   
- 	    if (WIFEXITED(status)) { //If the process ended
+ 	    if (WIFEXITED(status)) { //If the process ended successfully
 	    	printf("Exit status: %d\n", WEXITSTATUS(status));
 	    }
 	    else { //If the process was terminated by a signal
