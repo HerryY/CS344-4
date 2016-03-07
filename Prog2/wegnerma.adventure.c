@@ -1,5 +1,5 @@
 /**********************************************************
- * Name: Marta Ochoa
+ * Name: Marta Wegner
  * Assignment #2
  * File Name: wegnerma.adventure.c
  * CS 344
