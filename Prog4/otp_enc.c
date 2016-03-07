@@ -72,7 +72,16 @@ int main(int argc, char **argv) {
    plainText[pLen - 1] = '\0';
 
    //Check that chars in plain text are valid
-   
+   for (i = 0; i < pLen - 1; i++) {
+	if(isalpha(plainText[i]) || isspace(plainText[i])) {
+	   //If letter or space do nothing
+	}
+	else { //not letter of space
+	   //print error
+	   perror("Plain text invalid char");
+	   exit(1);
+	}
+   }
 
    //Check that chars in plain text are valid
 
