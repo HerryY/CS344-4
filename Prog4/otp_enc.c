@@ -83,7 +83,33 @@ int main(int argc, char **argv) {
 	}
    }
 
+   //Create string to hold key text
+   char *keyText = malloc(sizeof(char) * kLen); 
+
+   //Set file point to begining of file
+   lseek(fdKey, 0, SEEK_SET);
+
+   //Read key text into string
+   if (read(fdKey, keyText, kLen) == -1) {//read
+	//If error reading
+	perror("read key text enc");
+	exit(1);
+   }
+
+   //Null terminate the string
+   keyText[kLen - 1] = '\0';
+ 
    //Check that chars in plain text are valid
+   for (i = 0; i < kLen - 1; i++) {
+	if(isalpha(keyText[i]) || isspace(keyText[i])) {
+	   //If letter or space do nothing
+	}
+	else { //not letter of space
+	   //print error
+	   perror("key text invalid char");
+	   exit(1);
+	}
+   }
 
    return 0;
 }
