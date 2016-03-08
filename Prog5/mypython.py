@@ -46,5 +46,5 @@ print randNum1
 print randNum2
 
 #print sum of rand nums
-sum = randNum1 + randNum2
-print sum
+product = randNum1 * randNum2
+print product
