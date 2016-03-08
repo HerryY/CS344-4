@@ -111,5 +111,85 @@ int main(int argc, char **argv) {
 	}
    }
 
+   //Client
+   //create socket
+   int socketfd;
+
+   if((socketfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {//create
+	//Id error creating
+	perror("socket");
+	exit(1);
+   }
+
+   //Setting up address
+   struct hostent * server_ip_address;
+   server_ip_address = gethostbyname("localhost");
+
+   if(server_ip_address == NULL) {
+	fprintf(stderr, "could not resolve host name\n");
+	exit(1);
+   }
+ 
+   struct sockaddr_in server;
+
+   //clear socket structure
+   memset((char *)&server, 0, sizeof(server));
+
+
+   server.sin_family = AF_INET;
+   server.sin_port = htons(portNum);
+   memcpy(&server.sin_addr, server_ip_address->h_addr, 
+	  server_ip_address->h_length);
+
+
+   //Connect socket
+   if(connect(socketfd, (struct sockaddr*) &server, 
+			 sizeof(server)) == -1) {
+	perror("connect");
+	exit(1);
+   }
+
+   //confirm connection
+   int r;
+   int conNum;
+   //Receive confirmation number
+   if((r = recv(socketfd, &conNum, sizeof(conNum), 0)) == -1) {
+	//If error receiving
+	perror("recv enc");
+	exit(1);
+   } 
+   else if(r == 0) {
+	perror("recv enc 0");
+	exit(1);
+   }
+
+   //Check that confirmation number is correct
+   int confirm = ntohl(conNum);
+
+   //If number recieved is not correct
+   if (confirm != 1) {
+	fprintf(stderr, "could not contact otp_enc_d on port %d\n",
+		portNum);
+	exit(1);
+   }
+
+   //Successful connection to otp_enc_d
+   //send plain text file size
+   int pLenSend = htonl(pLen); //convert
+
+   if(send(socketfd, &pLenSend, sizeof(pLenSend), 0) == -1) {
+	perror("plain text file send");
+	exit(1);
+   }
+
+   //send key text file size
+   int kLenSend = htonl(kLen); //convert
+
+   if(send(socketfd, &kLenSend, sizeof(kLenSend), 0) == -1) {
+	perror("key text file send");
+	exit(1);
+   }
+
+
    return 0;
 }
