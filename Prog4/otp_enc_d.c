@@ -34,6 +34,7 @@ int main(int argc, char ** argv) {
 
    //if port not specified
    if (argc < 2) {
+	//Print error
 	printf("You must include a port number\n");
 	exit(1);
    }
@@ -45,7 +46,7 @@ int main(int argc, char ** argv) {
    //Server
    //Create socket
    if((socketfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {//Create
-	//If error
+	//If error print msg
 	printf("socket creation error\n");
 	exit(1);
    }
@@ -88,7 +89,9 @@ int main(int argc, char ** argv) {
 	   printf("fork error\n");
 	}
 	else if(pid == 0) {//child
-	   //Send connection confimation num
+	   //Send connection confimation num(1)
+	   //to confirm otp_enc is trying to 
+	   //connect
 	   int toSend = htonl(1);
 
 	   if(send(client_socket, &toSend, sizeof(toSend),
@@ -100,7 +103,7 @@ int main(int argc, char ** argv) {
 
 	   //get size of plain text
 	   int pNum;
-	   if(recv(client_socket, &pNum, sizeof(pNum), 0) == -1) {
+	   if(recv(client_socket, &pNum, sizeof(pNum), 0) == -1) {//receive
 		//Error receiving
 		printf("recv plain text size end_d -1\n");
 	   }
@@ -114,7 +117,7 @@ int main(int argc, char ** argv) {
 	   
 	   //get size of key text
 	   int kNum;
-	   if(recv(client_socket, &kNum, sizeof(kNum), 0) == -1) {
+	   if(recv(client_socket, &kNum, sizeof(kNum), 0) == -1) {//receive
 		//Error receiving size
 		printf("recv key text size end_d -1\n");
 	   }
@@ -133,11 +136,13 @@ int main(int argc, char ** argv) {
 	   //Receive plain text
 	   int len = 0;
 	   int r;
-	   while(len < pLen) {
-	      r = recv(client_socket, buffer, pLen, 0);
-	      len += r;
+	   while(len < pLen) {//while the whole file has 
+			      //not been received
+	      r = recv(client_socket, buffer, pLen, 0);//receive
+	      len += r;//add to total length received
 	
-	      if (r <= pLen) {
+	      if (r <= pLen) {//compare length received to total
+			      //len expected
 		   if(r == -1) {
 		       //Error receiving data
 		       printf("recv plain text file -1\n");
@@ -145,14 +150,13 @@ int main(int argc, char ** argv) {
 		   }
 		   if (r == 0) {
 		       //end of data
-		       if (len < pLen) {
+		       if (len < pLen) {//If not enough received
 			   printf("%recv plain text file <\n",len,pLen);
 			   exit(1);
 			}
 		   }
 		   else {
 	 		//Concat string
-	 		//Add to length
 			strncat(plainText,buffer,r);
 		   }
 	      } 
@@ -163,13 +167,13 @@ int main(int argc, char ** argv) {
    	   //clear buffer
    	   memset((char *)&buffer, '\0', sizeof(buffer));
 
-	   //Receive plain text
+	   //Receive key text
 	   len = 0;
-	   while(len < kLen) {
-	      r = recv(client_socket, buffer, kLen, 0);
-	      len += r;
+	   while(len < kLen) {//while whole string not received
+	      r = recv(client_socket, buffer, kLen, 0);//receive
+	      len += r;//add len recived to total len received
 	
-	      if (r <= kLen) {
+	      if (r <= kLen) {//If total not received yet
 		   if(r == -1) {
 		       //Error receiving data
 		       printf("recv key text file -1\n");
@@ -177,19 +181,54 @@ int main(int argc, char ** argv) {
 		   }
 		   if (r == 0) {
 		       //end of data
-		       if (len < pLen) {
+		       if (len < kLen) {//If not enough received
 			   printf("recv plain text file <\n");
 			   exit(1);
 			}
 		   }
 		   else {
 	 		//Concat string
-	 		//Add to length
 			strncat(keyText,buffer,r);
 		   }
 	      } 
 	   }
- printf("%s\n",keyText);
+
+	   int plainNum;
+	   int keyNum;
+	   int enNum;
+	   //Encrypt the plain text file using key
+	   for (i = 0; i < pLen; i++) {
+		//change plain chars to ints 0-26
+		if(plainText[i] == ' ') {//space
+		  plainNum = 26;
+		}
+		else {//letter
+		   plainNum = plainText[i] - 65;
+		}
+
+		//change key chars to ints 0-26
+		if(keyText[i] == ' ') {//space
+		   keyNum = 26;
+		}
+		else {
+		   keyNum = keyText[i] - 65;
+		}
+
+		//Determine encrypted char
+		enNum = plainNum - keyNum;
+		if (enNum < 0 ) {//If neg add 27
+		   enNum += 27;
+		}
+
+		//replace plain char with encrypted char
+		if(enNum == 26) { //space
+		   plainText[i] = ' ';
+		}
+		else {//letter
+		   plainText[i] = 'A' + (char)enNum;
+		}
+	   }
+printf("%s\n", plainText);
 	}      
 	else {//parent
 	   //close client connection
