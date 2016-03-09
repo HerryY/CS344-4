@@ -190,6 +190,17 @@ int main(int argc, char **argv) {
 	exit(1);
    }
 
+   //Send plain text
+   if(send(socketfd, plainText, pLen, 0) < pLen){
+	perror("plain text send");
+	exit(1);
+   }
+
+   //Send key text
+   if(send(socketfd, keyText, kLen, 0) < kLen){
+	perror("key text send");
+	exit(1);
+   }
 
    return 0;
 }

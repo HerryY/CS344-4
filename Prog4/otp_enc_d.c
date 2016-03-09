@@ -46,7 +46,7 @@ int main(int argc, char ** argv) {
    //Create socket
    if((socketfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {//Create
 	//If error
-	perror("socket");
+	printf("socket creation error\n");
 	exit(1);
    }
 
@@ -60,14 +60,14 @@ int main(int argc, char ** argv) {
    //bind socket to port
    if(bind(socketfd, (struct sockaddr *) &server, sizeof(server)) == -1) {//bind
 	//if bind error
-	perror("bind call failed");
+	printf("bind call failed\n");
 	exit(1);
    }
 
    //Listen for connections
    if(listen(socketfd, 5) == -1) {//listen
 	//If listen call error
-	perror("listen call failed");
+	printf("listen call failed\n");
 	exit(1);
    }
 
@@ -77,7 +77,7 @@ int main(int argc, char ** argv) {
 	client_socket = accept(socketfd, NULL, NULL);
 	if (client_socket == -1) {
 	    //if accept fails	
-	    perror("accept call failed");
+	    printf("accept call failed\n");
 	    exit(1);
 	}
 	
@@ -85,7 +85,7 @@ int main(int argc, char ** argv) {
 	int pid = fork();
 
 	if (pid == -1) {//fork error
-	   perror("fork");
+	   printf("fork error\n");
 	}
 	else if(pid == 0) {//child
 	   //Send connection confimation num
@@ -94,7 +94,7 @@ int main(int argc, char ** argv) {
 	   if(send(client_socket, &toSend, sizeof(toSend),
 		    0) == -1){
 		//If confirmation number failed to send
-		perror("client send failed");
+		printf("client send failed\n");
 		exit(1);
 	   }
 
@@ -102,12 +102,11 @@ int main(int argc, char ** argv) {
 	   int pNum;
 	   if(recv(client_socket, &pNum, sizeof(pNum), 0) == -1) {
 		//Error receiving
-		perror("recv plain text size end_d -1");
+		printf("recv plain text size end_d -1\n");
 	   }
 	   else if(pNum == 0) {
 		//Plain text file size == 0
-		perror("recv plain text size of 0");
-	 	exit(1);
+		printf("recv plain text size of 0\n");
 	   }
 		
 	   //pLen == length of plain text file
@@ -117,17 +116,81 @@ int main(int argc, char ** argv) {
 	   int kNum;
 	   if(recv(client_socket, &kNum, sizeof(kNum), 0) == -1) {
 		//Error receiving size
-		perror("recv key text size end_d -1");
+		printf("recv key text size end_d -1\n");
 	   }
 	   else if(kNum == 0) {
 		//If size of key file == 0
-		perror("recv key text size of 0");
-	 	exit(1);
+		printf("recv key text size of 0\n");
 	   }
 
 	   //kLen == length of key file
 	   int kLen = ntohl(kNum);//convert
-	}
+
+	   //Allocate memory for plain text
+   	   char *plainText = malloc(sizeof(char) * pLen); 
+   	   char buffer[1024];
+
+	   //Receive plain text
+	   int len = 0;
+	   int r;
+	   while(len < pLen) {
+	      r = recv(client_socket, buffer, pLen, 0);
+	      len += r;
+	
+	      if (r <= pLen) {
+		   if(r == -1) {
+		       //Error receiving data
+		       printf("recv plain text file -1\n");
+			exit(1);
+		   }
+		   if (r == 0) {
+		       //end of data
+		       if (len < pLen) {
+			   printf("%recv plain text file <\n",len,pLen);
+			   exit(1);
+			}
+		   }
+		   else {
+	 		//Concat string
+	 		//Add to length
+			strncat(plainText,buffer,r);
+		   }
+	      } 
+	   }
+	
+	   //Allocate memory for key text
+   	   char *keyText = malloc(sizeof(char) * kLen); 
+   	   //clear buffer
+   	   memset((char *)&buffer, '\0', sizeof(buffer));
+
+	   //Receive plain text
+	   len = 0;
+	   while(len < kLen) {
+	      r = recv(client_socket, buffer, kLen, 0);
+	      len += r;
+	
+	      if (r <= kLen) {
+		   if(r == -1) {
+		       //Error receiving data
+		       printf("recv key text file -1\n");
+			exit(1);
+		   }
+		   if (r == 0) {
+		       //end of data
+		       if (len < pLen) {
+			   printf("recv plain text file <\n");
+			   exit(1);
+			}
+		   }
+		   else {
+	 		//Concat string
+	 		//Add to length
+			strncat(keyText,buffer,r);
+		   }
+	      } 
+	   }
+ printf("%s\n",keyText);
+	}      
 	else {//parent
 	   //close client connection
 	   close(client_socket);
