@@ -1,19 +1,19 @@
 /**********************************************************
  * Name: Marta Wegner
- * File: otp_enc_d.c
- * Description: Performs encoding. Listens on a particular 
+ * File: otp_dec_d.c
+ * Description: Performs decoding. Listens on a particular 
  * port that is assigned when it is run, and receives 
- * plain text and a key via that port. Must output error
+ * cipher text and a key via that port. Outputs error
  * if the program cannot be run due to a network error.
  *
- * Makes a connection to opt_enc, and forks a process so
+ * Makes a connection to opt_dec, and forks a process so
  * it is available to receive more connections (supports up
  * to 5 connections.) 
  *
- * In forked process, encyption takes place and ciphertext 
+ * In forked process, encyption takes place and plaintext 
  * is written back.
  *
- * syntx: otp_enc_c listening port
+ * syntx: otp_dec_c listening port
  *********************************************************/
 #include<stdio.h>
 #include<stdlib.h>
@@ -90,30 +90,29 @@ int main(int argc, char ** argv) {
 	}
 	else if(pid == 0) {//child
 	   //Send connection confimation num(1)
-	   //to confirm otp_enc is trying to 
+	   //to confirm otp_dec is trying to 
 	   //connect
-	   int toSend = htonl(1);
+	   int toSend = htonl(0);
 
 	   if(send(client_socket, &toSend, sizeof(toSend),
 		    0) == -1){
 		//If confirmation number failed to send
 		printf("client send failed\n");
-		exit(1);
 	   }
 
-	   //get size of plain text
-	   int pNum;
-	   if(recv(client_socket, &pNum, sizeof(pNum), 0) == -1) {//receive
+	   //get size of cipher text
+	   int cNum;
+	   if(recv(client_socket, &cNum, sizeof(cNum), 0) == -1) {//receive
 		//Error receiving
-		printf("recv plain text size end_d -1\n");
+		printf("recv cipher text size end_d -1\n");
 	   }
-	   else if(pNum == 0) {
+	   else if(cNum == 0) {
 		//Plain text file size == 0
-		printf("recv plain text size of 0\n");
+		printf("recv cipher text size of 0\n");
 	   }
 		
-	   //pLen == length of plain text file
-	   int pLen = ntohl(pNum);//convert
+	   //cLen == length of cipher text file
+	   int cLen = ntohl(cNum);//convert
 	   
 	   //get size of key text
 	   int kNum;
@@ -129,42 +128,42 @@ int main(int argc, char ** argv) {
 	   //kLen == length of key file
 	   int kLen = ntohl(kNum);//convert
 
-	   //Allocate memory for plain text
-   	   char *plainText = malloc(sizeof(char) * pLen); 
+	   //Allocate memory for cipher text
+   	   char *cipherText = malloc(sizeof(char) * cLen); 
    	   char buffer[1024];
 
-	   //Clear plain text
-   	   memset(plainText, '\0', pLen);
+	   //Clear cipher text
+   	   memset(cipherText, '\0', cLen);
 
-	   //Receive plain text
+	   //Receive cipher text
 	   int len = 0;
 	   int r;
-	   while(len < pLen) {//while the whole file has 
+	   while(len < cLen) {//while the whole file has 
 			      //not been received
-	      r = recv(client_socket, buffer, pLen, 0);//receive
+	      r = recv(client_socket, buffer, cLen, 0);//receive
 	      len += r;//add to total length received
 	
-	      if (r <= pLen) {//compare length received to total
+	      if (r <= cLen) {//compare length received to total
 			      //len expected
 		   if(r == -1) {
 		       //Error receiving data
-			printf("recv plain text file -1\n");
+			printf("recv cipher text file -1\n");
 			break;
 		   }
 		   else if (r == 0) {
 		       //end of data
-		       if (len < pLen) {//If not enough received
-			   printf("%recv plain text file <\n",len,pLen);
+		       if (len < cLen) {//If not enough received
+			   printf("%recv cipher text file <\n",len,cLen);
 			   break;
 			}
 		   }
 		   else {
 	 		//Concat string
-			strncat(plainText,buffer,r);
+			strncat(cipherText,buffer,r);
 		   }
 	      } 
 	   }
-
+	
 	   //Allocate memory for key text
    	   char *keyText = malloc(sizeof(char) * kLen); 
    	   //clear buffer and key
@@ -197,17 +196,17 @@ int main(int argc, char ** argv) {
 	      } 
 	   }
 
-	   int plainNum;
+	   int cipherNum;
 	   int keyNum;
-	   int enNum;
-	   //Encrypt the plain text file using key
-	   for (i = 0; i < pLen - 1; i++) {
-		//change plain chars to ints 0-26
-		if(plainText[i] == ' ') {//space
-		  plainNum = 26;
+	   int decNum;
+	   //Decrypt the cipher text file using key
+	   for (i = 0; i < cLen - 1; i++) {
+		//change cipher chars to ints 0-26
+		if(cipherText[i] == ' ') {//space
+		  cipherNum = 26;
 		}
 		else {//letter
-		   plainNum = plainText[i] - 65;
+		   cipherNum = cipherText[i] - 65;
 		}
 
 		//change key chars to ints 0-26
@@ -218,28 +217,28 @@ int main(int argc, char ** argv) {
 		   keyNum = keyText[i] - 65;
 		}
 
-		//Determine encrypted char
-		enNum = plainNum + keyNum;
-		if (enNum >= 27) {//If >= 27 subtract 27
-		   enNum -= 27;
+		//Determine decrypted char
+		decNum = cipherNum - keyNum;
+		if (decNum < 0) {//If neg add 27
+		   decNum += 27;
 		}
 
-		//replace plain char with encrypted char
-		if(enNum == 26) { //space
-		   plainText[i] = ' ';
+		//replace cipher char with decrypted char
+		if(decNum == 26) { //space
+		   cipherText[i] = ' ';
 		}
 		else {//letter
-		   plainText[i] = 'A' + (char)enNum;
+		   cipherText[i] = 'A' + (char)decNum;
 		}
 	   }
-
-	   //send back encrypted file
-   	   if(send(client_socket, plainText, pLen, 0) < pLen) {
-		printf("encryption text send\n");
+	   
+	   //send back decrypted file
+   	   if(send(client_socket, cipherText, cLen, 0) < cLen) {
+		printf("decryption text send\n");
 	   }
 
 	   //free memory
-	   free(plainText);
+	   free(cipherText);
 	   free(keyText);
 	}      
 	else {//parent

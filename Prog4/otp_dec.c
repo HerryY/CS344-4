@@ -1,13 +1,13 @@
 /**********************************************************
  * Name: Marta Wegner
- * File Name: otp_enc.c
+ * File Name: otp_dec.c
  * Date: 3/7/16
- * Description: connects to otp_enc_d and asks it to
- * perform encyption.
- * syntax: otp_enc [plaintext] [key] [port]
- * When ciphertext is received, outputs it to stdout
- * If receives key or plaintext files with bad char, or key
- * file shorter than the plaintext, it exits with and error
+ * Description: connects to otp_dec_d and asks it to
+ * perform decyption.
+ * syntax: otp_dec [ciphertext] [key] [port]
+ * When plain text is received, outputs it to stdout
+ * If receives key or ciphertext files with bad char, or key
+ * file shorter than the ciphertext, it exits with an error
  * If port not found error reported to screen
  **********************************************************/
 #include<stdio.h>
@@ -26,59 +26,59 @@ int main(int argc, char **argv) {
 
    //Check for correct num of args
    if (argc < 4) {
-	printf("Must specifiy plaintext, key, and port number\n");
+	printf("Must specifiy ciphertext, key, and port number\n");
 	exit(1);
    }
 
    //Get port num from args
    int portNum = atoi(argv[3]);
 
-   //open plain text file and key for reading
-   int fdPlain = open(argv[1], O_RDONLY);
+   //open cipher text file and key for reading
+   int fdCipher = open(argv[1], O_RDONLY);
    int fdKey = open(argv[2], O_RDONLY);
 
    //check that there was not an error opening
-   if (fdPlain == -1 || fdKey == -1) {
+   if (fdCipher == -1 || fdKey == -1) {
 	printf("error opening files\n");
 	exit(1);
    }
 
-   //Get size of plain text
-   int pLen = lseek(fdPlain, 0, SEEK_END);
+   //Get size of cipher text
+   int cLen = lseek(fdCipher, 0, SEEK_END);
 
    //Get size of key text
    int kLen = lseek(fdKey, 0, SEEK_END);
 
-   //Verify key file is larger than plain text
-   if (kLen < pLen) { //compare key to plain
+   //Verify key file is larger than cipher text
+   if (kLen < cLen) { //compare key to plain
 	printf("Key too short\n");
 	exit(1);
    }
 
-   //Create string to hold plain text
-   char *plainText = malloc(sizeof(char) * pLen); 
+   //Create string to hold cipher text
+   char *cipherText = malloc(sizeof(char) * cLen); 
 
    //Set file point to begining of file
-   lseek(fdPlain, 0, SEEK_SET);
+   lseek(fdCipher, 0, SEEK_SET);
 
-   //Read plain text into string
-   if (read(fdPlain, plainText, pLen) == -1) {//read
+   //Read cipher text into string
+   if (read(fdCipher, cipherText, cLen) == -1) {//read
 	//If error reading
-	printf("read plain text enc\n");
+	printf("read cipher text dec\n");
 	exit(1);
    }
 
    //Null terminate the string
-   plainText[pLen - 1] = '\0';
+   cipherText[cLen - 1] = '\0';
 
-   //Check that chars in plain text are valid
-   for (i = 0; i < pLen - 1; i++) {
-	if(isalpha(plainText[i]) || isspace(plainText[i])) {
+   //Check that chars in cipher text are valid
+   for (i = 0; i < cLen - 1; i++) {
+	if(isalpha(cipherText[i]) || isspace(cipherText[i])) {
 	   //If letter or space do nothing
 	}
 	else { //not letter of space
 	   //print error
-	   printf("Plain text invalid char\n");
+	   printf("Cipher text invalid char\n");
 	   exit(1);
 	}
    }
@@ -167,18 +167,18 @@ int main(int argc, char **argv) {
    int confirm = ntohl(conNum);
 
    //If number recieved is not correct
-   if (confirm != 1) {
-	printf("could not contact otp_enc_d on port %d\n",
+   if (confirm != 0) {
+	printf("could not contact otp_dec_d on port %d\n",
 		portNum);
 	exit(1);
    }
 
    //Successful connection to otp_enc_d
-   //send plain text file size
-   int pLenSend = htonl(pLen); //convert
+   //send cipher text file size
+   int cLenSend = htonl(cLen); //convert
 
-   if(send(socketfd, &pLenSend, sizeof(pLenSend), 0) == -1) {
-	printf("plain text file send\n");
+   if(send(socketfd, &cLenSend, sizeof(cLenSend), 0) == -1) {
+	printf("cipher text file send\n");
 	exit(1);
    }
 
@@ -190,9 +190,9 @@ int main(int argc, char **argv) {
 	exit(1);
    }
 
-   //Send plain text
-   if(send(socketfd, plainText, pLen, 0) < pLen){
-	printf("plain text send\n");
+   //Send cipher text
+   if(send(socketfd, cipherText, cLen, 0) < cLen){
+	printf("cipher text send\n");
 	exit(1);
    }
 
@@ -202,44 +202,46 @@ int main(int argc, char **argv) {
 	exit(1);
    }
 
-   //Receive back encrypted text
-   //allocate memory for cipher text
-   char *cipherText = malloc(sizeof(char) * pLen);
+   //Receive back decrypted text
+   //allocate memory for plain text
+   char *plainText = malloc(sizeof(char) * cLen);
    char buffer[1042];
 
-   //Clear ciphertext 
-   memset(cipherText, '\0', pLen);
+   //Clear plaintext 
+   memset(plainText, '\0', cLen);
 
-   //Receive cipher
+   //Receive plain text
    int len = 0;
    r = 0;
-   while(len < pLen) { //while the whole file has not 
+   while(len < cLen) { //while the whole file has not 
  		       //been received
- 	r = recv(socketfd, buffer, pLen, 0);//receive
+ 	r = recv(socketfd, buffer, cLen, 0);//receive
 	len += r;//add len received to total len received
 
 	if (r <= len) {//If total len not yet received
 	   if(r == -1) {
 		//Error receiving data
-		printf("recv cipher text file -1\n");
+		printf("recv plain text file -1\n");
 		break;
 	   }	   
 	   else if(r == 0) {
 		//end of data
-		if(len < pLen) {
-		   printf("recv cipher text file <\n");
+		if(len < cLen) {
+		   printf("recv plain text file <\n");
 		   break;
 		}
 	   }
 	   else {
 		//concat string
-		strncat(cipherText,buffer,r);
+		strncat(plainText,buffer,r);
 	   }	   
 	}
    }
 
-   //Print cipher text
-   printf("%s\n", cipherText);
+   plainText[cLen] = '\n';
+
+   //Print plain text
+   printf("%s", plainText);
 
    //Free memory
    free(plainText);
