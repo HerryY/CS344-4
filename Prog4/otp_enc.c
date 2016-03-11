@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 
    //Check for correct num of args
    if (argc < 4) {
-	fprintf(stderr , "Must specifiy plaintext, key, and port number\n");
+	printf("Must specifiy plaintext, key, and port number\n");
 	exit(1);
    }
 
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
    //check that there was not an error opening
    if (fdPlain == -1 || fdKey == -1) {
-	perror("open files");
+	printf("error opening files\n");
 	exit(1);
    }
 
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 
    //Verify key file is larger than plain text
    if (kLen < pLen) { //compare key to plain
-	perror("Key too short");
+	printf("Key too short\n");
 	exit(1);
    }
 
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
    //Read plain text into string
    if (read(fdPlain, plainText, pLen) == -1) {//read
 	//If error reading
-	perror("read plain text enc");
+	printf("read plain text enc\n");
 	exit(1);
    }
 
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 	}
 	else { //not letter of space
 	   //print error
-	   perror("Plain text invalid char");
+	   printf("Plain text invalid char\n");
 	   exit(1);
 	}
    }
@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
    //Read key text into string
    if (read(fdKey, keyText, kLen) == -1) {//read
 	//If error reading
-	perror("read key text enc");
+	printf("read key text enc\n");
 	exit(1);
    }
 
@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
 	}
 	else { //not letter of space
 	   //print error
-	   perror("key text invalid char");
+	   printf("key text invalid char\n");
 	   exit(1);
 	}
    }
@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
 
    if((socketfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {//create
 	//Id error creating
-	perror("socket");
+	printf("socket error\n");
 	exit(1);
    }
 
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
    server_ip_address = gethostbyname("localhost");
 
    if(server_ip_address == NULL) {
-	fprintf(stderr, "could not resolve host name\n");
+	printf("could not resolve host name\n");
 	exit(1);
    }
  
@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
    //Connect socket
    if(connect(socketfd, (struct sockaddr*) &server, 
 			 sizeof(server)) == -1) {
-	perror("connect");
+	printf("connect\n");
 	exit(1);
    }
 
@@ -155,11 +155,11 @@ int main(int argc, char **argv) {
    //Receive confirmation number
    if((r = recv(socketfd, &conNum, sizeof(conNum), 0)) == -1) {
 	//If error receiving
-	perror("recv enc");
+	printf("recv enc\n");
 	exit(1);
    } 
    else if(r == 0) {
-	perror("recv enc 0");
+	printf("recv enc 0\n");
 	exit(1);
    }
 
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
 
    //If number recieved is not correct
    if (confirm != 1) {
-	fprintf(stderr, "could not contact otp_enc_d on port %d\n",
+	printf("could not contact otp_enc_d on port %d\n",
 		portNum);
 	exit(1);
    }
@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
    int pLenSend = htonl(pLen); //convert
 
    if(send(socketfd, &pLenSend, sizeof(pLenSend), 0) == -1) {
-	perror("plain text file send");
+	printf("plain text file send\n");
 	exit(1);
    }
 
@@ -186,13 +186,13 @@ int main(int argc, char **argv) {
    int kLenSend = htonl(kLen); //convert
 
    if(send(socketfd, &kLenSend, sizeof(kLenSend), 0) == -1) {
-	perror("key text file send");
+	printf("key text file send\n");
 	exit(1);
    }
 
    //Send plain text
    if(send(socketfd, plainText, pLen, 0) < pLen){
-	perror("plain text send");
+	printf("plain text send\n");
 	exit(1);
    }
 
@@ -201,6 +201,45 @@ int main(int argc, char **argv) {
 	perror("key text send");
 	exit(1);
    }
+
+   //Receive back encrypted text
+   //allocate memory for cipher text
+   char *cipherText = malloc(sizeof(char) * pLen);
+   char buffer[1042];
+
+   //Clear ciphertext 
+   memset(cipherText, '\0', pLen);
+
+   //Receive cipher
+   int len = 0;
+   r = 0;
+   while(len < pLen) { //while the whole file has not 
+ 		       //been received
+ 	r = recv(socketfd, buffer, pLen, 0);//receive
+	len += r;//add len received to total len received
+
+	if (r <= len) {//If total len not yet received
+	   if(r == -1) {
+		//Error receiving data
+		printf("recv cipher text file -1\n");
+		break;
+	   }	   
+	   else if(r == 0) {
+		//end of data
+		if(len < pLen) {
+		   printf("recv cipher text file <\n");
+		   break;
+		}
+	   }
+	   else {
+		//concat string
+		strncat(cipherText,buffer,r);
+	   }	   
+	}
+   }
+
+   //Print cipher text
+   printf("%s\n", cipherText);
 
    return 0;
 }

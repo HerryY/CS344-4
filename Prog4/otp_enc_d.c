@@ -133,6 +133,9 @@ int main(int argc, char ** argv) {
    	   char *plainText = malloc(sizeof(char) * pLen); 
    	   char buffer[1024];
 
+	   //Clear plain text
+   	   memset(plainText, '\0', pLen);
+
 	   //Receive plain text
 	   int len = 0;
 	   int r;
@@ -145,14 +148,14 @@ int main(int argc, char ** argv) {
 			      //len expected
 		   if(r == -1) {
 		       //Error receiving data
-		       printf("recv plain text file -1\n");
-			exit(1);
+			printf("recv plain text file -1\n");
+			break;
 		   }
-		   if (r == 0) {
+		   else if (r == 0) {
 		       //end of data
 		       if (len < pLen) {//If not enough received
 			   printf("%recv plain text file <\n",len,pLen);
-			   exit(1);
+			   break;
 			}
 		   }
 		   else {
@@ -164,8 +167,9 @@ int main(int argc, char ** argv) {
 	
 	   //Allocate memory for key text
    	   char *keyText = malloc(sizeof(char) * kLen); 
-   	   //clear buffer
+   	   //clear buffer and key
    	   memset((char *)&buffer, '\0', sizeof(buffer));
+	   memset(keyText, '\0', kLen);
 
 	   //Receive key text
 	   len = 0;
@@ -177,13 +181,13 @@ int main(int argc, char ** argv) {
 		   if(r == -1) {
 		       //Error receiving data
 		       printf("recv key text file -1\n");
-			exit(1);
+			break;
 		   }
-		   if (r == 0) {
+		   else if (r == 0) {
 		       //end of data
 		       if (len < kLen) {//If not enough received
-			   printf("recv plain text file <\n");
-			   exit(1);
+			   printf("recv key text file <\n");
+			   break;
 			}
 		   }
 		   else {
@@ -228,7 +232,11 @@ int main(int argc, char ** argv) {
 		   plainText[i] = 'A' + (char)enNum;
 		}
 	   }
-printf("%s\n", plainText);
+	  printf("%s\n",plainText); 
+	   //send back encrypted file
+   	   if(send(client_socket, plainText, pLen, 0) < pLen) {
+		printf("encryption text send\n");
+	   }
 	}      
 	else {//parent
 	   //close client connection
