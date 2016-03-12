@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
    if (confirm != 1) {
 	printf("could not contact otp_enc_d on port %d\n",
 		portNum);
-	exit(1);
+	exit(2);
    }
 
    //Successful connection to otp_enc_d
@@ -191,15 +191,42 @@ int main(int argc, char **argv) {
    }
 
    //Send plain text
-   if(send(socketfd, plainText, pLen, 0) < pLen){
-	printf("plain text send\n");
-	exit(1);
+   int len = 0;
+   while (len <= pLen) { //while whole file not sent
+	char plainSend[1024];//hold text to senf
+
+	//subset of plain to senf
+	strncpy(plainSend, &plainText[len], 1023);
+
+	plainSend[1024] = '\0';//null terminate
+	
+	//send 
+	if(send(socketfd, &plainSend, 1024, 0) == -1){
+	   printf("plain text send\n");
+	   exit(1);
+	}
+
+	len += 1023;//Add length sent to len
    }
 
    //Send key text
-   if(send(socketfd, keyText, kLen, 0) < kLen){
-	perror("key text send");
-	exit(1);
+   len = 0;
+   while (len <= kLen) {//while whole key is not sent
+	char keySend[1024];//subset
+
+	//subset of key to send
+	strncpy(keySend, &keyText[len], 1023);
+
+	//null terminate
+	keySend[1024] = '\0';
+
+	//send
+   	if(send(socketfd, &keySend, 1024, 0) == -1){
+		printf("key text send\n");
+		exit(1);
+   	}
+
+	len += 1023;//add len sent to len
    }
 
    //Receive back encrypted text
@@ -211,31 +238,34 @@ int main(int argc, char **argv) {
    memset(cipherText, '\0', pLen);
 
    //Receive cipher
-   int len = 0;
+   len = 0;
    r = 0;
    while(len < pLen) { //while the whole file has not 
  		       //been received
- 	r = recv(socketfd, buffer, pLen, 0);//receive
-	len += r;//add len received to total len received
+	//clear buffer each use
+	memset((char *)buffer, '\0', sizeof(buffer));
 
-	if (r <= len) {//If total len not yet received
-	   if(r == -1) {
-		//Error receiving data
-		printf("recv cipher text file -1\n");
-		break;
-	   }	   
-	   else if(r == 0) {
-		//end of data
-		if(len < pLen) {
-		   printf("recv cipher text file <\n");
-		   break;
-		}
+	//receive
+ 	r = recv(socketfd, buffer, 1024, 0);//receive
+
+        if(r == -1) {
+	   //Error receiving data
+	   printf("recv cipher text file -1\n");
+	   exit(1);
+	}	   
+	else if(r == 0) {
+	   //end of data
+	   if(len < pLen) {
+		printf("recv cipher text file <\n");
+		exit(1);
 	   }
-	   else {
-		//concat string
-		strncat(cipherText,buffer,r);
-	   }	   
 	}
+	else {
+	   //concat string
+	   strncat(cipherText,buffer,(r-1));
+	}	   
+
+	len += (r-1); //Add len recieved to len
    }
 
    //Print cipher text

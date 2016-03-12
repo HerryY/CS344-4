@@ -139,63 +139,66 @@ int main(int argc, char ** argv) {
 	   //Receive plain text
 	   int len = 0;
 	   int r;
-	   while(len < pLen) {//while the whole file has 
+	   while(len <= pLen) {//while the whole file has 
 			      //not been received
-	      r = recv(client_socket, buffer, pLen, 0);//receive
-	      len += r;//add to total length received
-	
-	      if (r <= pLen) {//compare length received to total
-			      //len expected
-		   if(r == -1) {
-		       //Error receiving data
-			printf("recv plain text file -1\n");
-			break;
-		   }
-		   else if (r == 0) {
-		       //end of data
-		       if (len < pLen) {//If not enough received
-			   printf("%recv plain text file <\n",len,pLen);
-			   break;
-			}
-		   }
-		   else {
-	 		//Concat string
-			strncat(plainText,buffer,r);
-		   }
+	      memset((char *)buffer, '\0', sizeof(buffer));//clear buffer each use
+
+	      r = recv(client_socket, &buffer, 1024, 0);//receive
+
+ 	      if(r == -1) {
+		 //Error receiving data
+		 printf("recv plain text file -1\n");
+		 break;
+	      }
+	      else if (r == 0) {
+		 //end of data
+		 if (len < pLen) {//If not enough received
+		   break;
+		 }
+	      }
+	      else {
+	 	//Concat string
+		strncat(plainText,buffer,(r - 1));
 	      } 
+
+	      len += (r-1);//add len received to total len received
 	   }
+
+	   plainText[pLen - 1] = '\0'; //null terminate
 
 	   //Allocate memory for key text
    	   char *keyText = malloc(sizeof(char) * kLen); 
    	   //clear buffer and key
-   	   memset((char *)&buffer, '\0', sizeof(buffer));
+   	   memset((char *)buffer, '\0', sizeof(buffer));
 	   memset(keyText, '\0', kLen);
 
 	   //Receive key text
 	   len = 0;
-	   while(len < kLen) {//while whole string not received
-	      r = recv(client_socket, buffer, kLen, 0);//receive
-	      len += r;//add len recived to total len received
-	
-	      if (r <= kLen) {//If total not received yet
-		   if(r == -1) {
-		       //Error receiving data
-		       printf("recv key text file -1\n");
-			break;
-		   }
-		   else if (r == 0) {
+
+	   while(len <= kLen) {//while whole string not received
+	      //clear buffer each use
+   	      memset((char *)buffer, '\0', sizeof(buffer)); 
+
+	      r = recv(client_socket, &buffer, 1024, 0);//receive
+
+	   	if(r == -1) {
+		   //Error receiving data
+		   printf("recv key text file -1\n");
+	  	   break;
+	   	}
+	   	else if (r == 0) {
 		       //end of data
-		       if (len < kLen) {//If not enough received
-			   printf("recv key text file <\n");
-			   break;
-			}
+		       break;
 		   }
 		   else {
 	 		//Concat string
-			strncat(keyText,buffer,r);
+			strncat(keyText,buffer,(r - 1));
 		   }
-	      } 
+	       
+	      len += (r - 1);//add len recived to total len received
 	   }
+
+	   keyText[kLen - 1] = '\0';
 
 	   int plainNum;
 	   int keyNum;
@@ -234,8 +237,20 @@ int main(int argc, char ** argv) {
 	   }
 
 	   //send back encrypted file
-   	   if(send(client_socket, plainText, pLen, 0) < pLen) {
-		printf("encryption text send\n");
+	   len = 0;
+	   while (len <= pLen) { //While whole file is not sent
+		char cipherSend[1024];
+	
+		//Copy subsection of string to send	
+		strncpy(cipherSend, &plainText[len], 1023);
+
+		cipherSend[1024] = '\0'; //null terminate
+
+   		if(send(client_socket, &cipherSend, 1024, 0) < pLen) {
+		    printf("encryption text send\n");
+		}
+
+		len += 1023; //Add sent  lenght to len
 	   }
 
 	   //free memory
