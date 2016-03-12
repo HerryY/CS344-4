@@ -177,7 +177,8 @@ int main(int argc, char **argv) {
    //send cipher text file size
    int cLenSend = htonl(cLen); //convert
 
-   if(send(socketfd, &cLenSend, sizeof(cLenSend), 0) == -1) {
+   if(send(socketfd, &cLenSend, sizeof(cLenSend), 0) == -1) {//send
+	//If error sending plen
 	fprintf(stderr, "cipher text file send\n");
 	exit(1);
    }
@@ -185,7 +186,8 @@ int main(int argc, char **argv) {
    //send key text file size
    int kLenSend = htonl(kLen); //convert
 
-   if(send(socketfd, &kLenSend, sizeof(kLenSend), 0) == -1) {
+   if(send(socketfd, &kLenSend, sizeof(kLenSend), 0) == -1) {//send
+	//If error sending klen
 	fprintf(stderr, "key text file send\n");
 	exit(1);
    }
@@ -201,7 +203,7 @@ int main(int argc, char **argv) {
 	cipherSend[1024] = '\0'; //null terminate
 
 	//send
-   	if(send(socketfd, cipherText, 1024, 0) == -1){
+   	if(send(socketfd, cipherSend, 1024, 0) == -1){
 	   //If error sending
 	   printf("cipher text send\n");
 	   exit(1);
@@ -256,7 +258,8 @@ int main(int argc, char **argv) {
 	   }	   
 	   else if(r == 0) {
 		//end of data
-		if (len < cLen) {
+		if (len < cLen) {//If not enough received
+		   //error msg
 		   fprintf(stderr, "recv plain text file <\n");
 		   exit(1);
 		}
@@ -269,7 +272,7 @@ int main(int argc, char **argv) {
 	len += (r-1); //add len received to len
    }
 
-   plainText[cLen - 1] = '\0';
+   plainText[cLen - 1] = '\0';//null terminate
 
    //Print plain text
    printf("%s\n", plainText);

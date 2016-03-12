@@ -175,7 +175,6 @@ int main(int argc, char ** argv) {
 
 	   while(len <= kLen) {//while whole string not received
 	      //clear buffer each use
-
 	      memset((char *) buffer, '\0', sizeof(buffer));
 
 	      r = recv(client_socket, &buffer, 1024, 0);//receive
@@ -246,6 +245,7 @@ int main(int argc, char ** argv) {
 
 		plainSend[1024] = '\0'; //null terminate
 
+		//send subset
    	   	if(send(client_socket, &plainSend, 1024, 0) == -1) {
 		   fprintf(stderr, "decryption text send\n");
 	   	}
