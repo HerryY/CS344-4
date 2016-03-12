@@ -201,7 +201,7 @@ int main(int argc, char **argv) {
 	cipherSend[1024] = '\0'; //null terminate
 
 	//send
-   	if(send(socketfd, cipherText, cLen, 0) == -1){
+   	if(send(socketfd, cipherText, 1024, 0) == -1){
 	   //If error sending
 	   printf("cipher text send\n");
 	   exit(1);
@@ -222,9 +222,9 @@ int main(int argc, char **argv) {
 	keySend[1024] = '\0';
 
 	//send
-   	if(send(socketfd, keyText, kLen, 0) < kLen){
+   	if(send(socketfd, &keySend, 1024, 0) == -1){
 	   //If error sending
-	   perror("key text send");
+	   printf("key text send\n");
 	   exit(1);
 	}
 
@@ -247,18 +247,18 @@ int main(int argc, char **argv) {
  	//clear buffer each use
  	memset((char *)buffer, '\0', sizeof(buffer));
 
- 	r = recv(socketfd, buffer, cLen, 0);//receive
-
+ 	r = recv(socketfd, buffer, 1024, 0);//receive
 
 	   if(r == -1) {
 		//Error receiving data
-		printf("recv plain text file -1\n");
-		break;
+		printf("recv plain text file dec\n");
+		exit(1);
 	   }	   
 	   else if(r == 0) {
 		//end of data
-		if(len < cLen) {
-		   break;
+		if (len < cLen) {
+		   printf("recv plain text file <\n");
+		   exit(1);
 		}
 	   }
 	   else {
@@ -269,7 +269,7 @@ int main(int argc, char **argv) {
 	len += (r-1); //add len received to len
    }
 
-   plainText[cLen] = '\n';
+   plainText[cLen - 1] = '\0';
 
    //Print plain text
    printf("%s\n", plainText);

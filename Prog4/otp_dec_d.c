@@ -172,23 +172,22 @@ int main(int argc, char ** argv) {
 
 	   //Receive key text
 	   len = 0;
-	   while(len < kLen) {//while whole string not received
+
+	   while(len <= kLen) {//while whole string not received
 	      //clear buffer each use
+
 	      memset((char *) buffer, '\0', sizeof(buffer));
 
-	      r = recv(client_socket, buffer, kLen, 0);//receive
-	      len += r;//add len recived to total len received
+	      r = recv(client_socket, &buffer, 1024, 0);//receive
 	
 		   if(r == -1) {
 		       //Error receiving data
-		       printf("recv key text file -1\n");
+		       printf("recv key text file dec_d\n");
 			break;
 		   }
 		   else if (r == 0) {
 		       //end of data
-		       if (len < kLen) {//If not enough received
-			   break;
-			}
+			break;
 		   }
 		   else {
 	 		//Concat string
@@ -235,9 +234,10 @@ int main(int argc, char ** argv) {
 		   cipherText[i] = 'A' + (char)decNum;
 		}
 	   }
-	   
+
 	   //send back decrypted file
 	   len  = 0;
+
 	   while (len <= cLen) {//while whole file is not sent
 		char plainSend[1024];
 
@@ -246,7 +246,7 @@ int main(int argc, char ** argv) {
 
 		plainSend[1024] = '\0'; //null terminate
 
-   	   	if(send(client_socket, &plainSend, cLen, 0) == -1) {
+   	   	if(send(client_socket, &plainSend, 1024, 0) == -1) {
 		   printf("decryption text send\n");
 	   	}
 

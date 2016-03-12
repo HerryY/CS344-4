@@ -268,6 +268,8 @@ int main(int argc, char **argv) {
 	len += (r-1); //Add len recieved to len
    }
 
+   cipherText[pLen - 1] = '\0';
+
    //Print cipher text
    printf("%s\n", cipherText);
 
