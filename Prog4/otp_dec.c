@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 
    //Check for correct num of args
    if (argc < 4) {
-	printf("Must specifiy ciphertext, key, and port number\n");
+	fprintf(stderr, "Must specifiy ciphertext, key, and port number\n");
 	exit(1);
    }
 
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
    //check that there was not an error opening
    if (fdCipher == -1 || fdKey == -1) {
-	printf("error opening files\n");
+	fprintf(stderr, "error opening files\n");
 	exit(1);
    }
 
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 
    //Verify key file is larger than cipher text
    if (kLen < cLen) { //compare key to plain
-	printf("Key too short\n");
+	fprintf(stderr, "Key too short\n");
 	exit(1);
    }
 
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
    //Read cipher text into string
    if (read(fdCipher, cipherText, cLen) == -1) {//read
 	//If error reading
-	printf("read cipher text dec\n");
+	fprintf(stderr, "read cipher text dec\n");
 	exit(1);
    }
 
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 	}
 	else { //not letter of space
 	   //print error
-	   printf("Cipher text invalid char\n");
+	   fprintf(stderr, "Cipher text invalid char\n");
 	   exit(1);
 	}
    }
@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
    //Read key text into string
    if (read(fdKey, keyText, kLen) == -1) {//read
 	//If error reading
-	printf("read key text enc\n");
+	fprintf(stderr, "read key text enc\n");
 	exit(1);
    }
 
@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
 	}
 	else { //not letter of space
 	   //print error
-	   printf("key text invalid char\n");
+	   fprintf(stderr, "key text invalid char\n");
 	   exit(1);
 	}
    }
@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
 
    if((socketfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {//create
 	//Id error creating
-	printf("socket error\n");
+	fprintf(stderr, "socket error\n");
 	exit(1);
    }
 
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
    server_ip_address = gethostbyname("localhost");
 
    if(server_ip_address == NULL) {
-	printf("could not resolve host name\n");
+	fprintf(stderr, "could not resolve host name\n");
 	exit(1);
    }
  
@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
    //Connect socket
    if(connect(socketfd, (struct sockaddr*) &server, 
 			 sizeof(server)) == -1) {
-	printf("connect\n");
+	fprintf(stderr, "connect\n");
 	exit(2);
    }
 
@@ -155,11 +155,11 @@ int main(int argc, char **argv) {
    //Receive confirmation number
    if((r = recv(socketfd, &conNum, sizeof(conNum), 0)) == -1) {
 	//If error receiving
-	printf("recv enc\n");
+	fprintf(stderr, "recv enc\n");
 	exit(1);
    } 
    else if(r == 0) {
-	printf("recv enc 0\n");
+	fprintf(stderr, "recv enc 0\n");
 	exit(1);
    }
 
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
 
    //If number recieved is not correct
    if (confirm != 0) {
-	printf("could not contact otp_dec_d on port %d\n",
+	fprintf(stderr, "could not contact otp_dec_d on port %d\n",
 		portNum);
 	exit(2);
    }
@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
    int cLenSend = htonl(cLen); //convert
 
    if(send(socketfd, &cLenSend, sizeof(cLenSend), 0) == -1) {
-	printf("cipher text file send\n");
+	fprintf(stderr, "cipher text file send\n");
 	exit(1);
    }
 
@@ -186,7 +186,7 @@ int main(int argc, char **argv) {
    int kLenSend = htonl(kLen); //convert
 
    if(send(socketfd, &kLenSend, sizeof(kLenSend), 0) == -1) {
-	printf("key text file send\n");
+	fprintf(stderr, "key text file send\n");
 	exit(1);
    }
 
@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
 	//send
    	if(send(socketfd, &keySend, 1024, 0) == -1){
 	   //If error sending
-	   printf("key text send\n");
+	   fprintf(stderr, "key text send\n");
 	   exit(1);
 	}
 
@@ -251,13 +251,13 @@ int main(int argc, char **argv) {
 
 	   if(r == -1) {
 		//Error receiving data
-		printf("recv plain text file dec\n");
+		fprintf(stderr, "recv plain text file dec\n");
 		exit(1);
 	   }	   
 	   else if(r == 0) {
 		//end of data
 		if (len < cLen) {
-		   printf("recv plain text file <\n");
+		   fprintf(stderr, "recv plain text file <\n");
 		   exit(1);
 		}
 	   }

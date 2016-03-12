@@ -35,7 +35,7 @@ int main(int argc, char ** argv) {
    //if port not specified
    if (argc < 2) {
 	//Print error
-	printf("You must include a port number\n");
+	fprintf(stderr, "You must include a port number\n");
 	exit(1);
    }
    else {
@@ -47,7 +47,7 @@ int main(int argc, char ** argv) {
    //Create socket
    if((socketfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {//Create
 	//If error print msg
-	printf("socket creation error\n");
+	fprintf(stderr, "socket creation error\n");
 	exit(1);
    }
 
@@ -61,14 +61,14 @@ int main(int argc, char ** argv) {
    //bind socket to port
    if(bind(socketfd, (struct sockaddr *) &server, sizeof(server)) == -1) {//bind
 	//if bind error
-	printf("bind call failed\n");
+	fprintf(stderr, "bind call failed\n");
 	exit(1);
    }
 
    //Listen for connections
    if(listen(socketfd, 5) == -1) {//listen
 	//If listen call error
-	printf("listen call failed\n");
+	fprintf(stderr, "listen call failed\n");
 	exit(1);
    }
 
@@ -78,7 +78,7 @@ int main(int argc, char ** argv) {
 	client_socket = accept(socketfd, NULL, NULL);
 	if (client_socket == -1) {
 	    //if accept fails	
-	    printf("accept call failed\n");
+	    fprintf(stderr, "accept call failed\n");
 	    exit(1);
 	}
 	
@@ -86,7 +86,7 @@ int main(int argc, char ** argv) {
 	int pid = fork();
 
 	if (pid == -1) {//fork error
-	   printf("fork error\n");
+	   fprintf(stderr, "fork error\n");
 	}
 	else if(pid == 0) {//child
 	   //Send connection confimation num(1)
@@ -97,18 +97,18 @@ int main(int argc, char ** argv) {
 	   if(send(client_socket, &toSend, sizeof(toSend),
 		    0) == -1){
 		//If confirmation number failed to send
-		printf("client send failed\n");
+		fprintf(stderr, "client send failed\n");
 	   }
 
 	   //get size of cipher text
 	   int cNum;
 	   if(recv(client_socket, &cNum, sizeof(cNum), 0) == -1) {//receive
 		//Error receiving
-		printf("recv cipher text size end_d -1\n");
+		fprintf(stderr, "recv cipher text size end_d -1\n");
 	   }
 	   else if(cNum == 0) {
 		//Plain text file size == 0
-		printf("recv cipher text size of 0\n");
+		fprintf(stderr, "recv cipher text size of 0\n");
 	   }
 		
 	   //cLen == length of cipher text file
@@ -118,11 +118,11 @@ int main(int argc, char ** argv) {
 	   int kNum;
 	   if(recv(client_socket, &kNum, sizeof(kNum), 0) == -1) {//receive
 		//Error receiving size
-		printf("recv key text size end_d -1\n");
+		fprintf(stderr, "recv key text size end_d -1\n");
 	   }
 	   else if(kNum == 0) {
 		//If size of key file == 0
-		printf("recv key text size of 0\n");
+		fprintf(stderr, "recv key text size of 0\n");
 	   }
 
 	   //kLen == length of key file
@@ -145,7 +145,7 @@ int main(int argc, char ** argv) {
 
 	      if(r == -1) {
 		//Error receiving data
-		printf("recv cipher text file -1\n");
+		fprintf(stderr, "recv cipher text file -1\n");
 		break;
 	      }
 	      else if (r == 0) {
@@ -182,7 +182,7 @@ int main(int argc, char ** argv) {
 
 		   if(r == -1) {
 		       //Error receiving data
-		       printf("recv key text file dec_d\n");
+		       fprintf(stderr, "recv key text file dec_d\n");
 			break;
 		   }
 		   else if (r == 0) {
@@ -247,7 +247,7 @@ int main(int argc, char ** argv) {
 		plainSend[1024] = '\0'; //null terminate
 
    	   	if(send(client_socket, &plainSend, 1024, 0) == -1) {
-		   printf("decryption text send\n");
+		   fprintf(stderr, "decryption text send\n");
 	   	}
 
 		len += 1023; //add sent len to total leni
