@@ -179,7 +179,7 @@ int main(int argc, char ** argv) {
 	      memset((char *) buffer, '\0', sizeof(buffer));
 
 	      r = recv(client_socket, &buffer, 1024, 0);//receive
-	
+
 		   if(r == -1) {
 		       //Error receiving data
 		       printf("recv key text file dec_d\n");
@@ -250,12 +250,12 @@ int main(int argc, char ** argv) {
 		   printf("decryption text send\n");
 	   	}
 
-		len += 1023; //add sent len to total len
+		len += 1023; //add sent len to total leni
 	   }
 
 	   //free memory
 	   free(cipherText);
-	   free(keyText);
+//	   free(keyText);
 	}      
 	else {//parent
 	   //close client connection
@@ -270,6 +270,6 @@ int main(int argc, char ** argv) {
 	
    //close socket
    close(socketfd);
-
+	   
    return 0;
 }

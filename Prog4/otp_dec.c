@@ -234,7 +234,7 @@ int main(int argc, char **argv) {
    //Receive back decrypted text
    //allocate memory for plain text
    char *plainText = malloc(sizeof(char) * cLen);
-   char buffer[1042];
+   char buffer[1024];
 
    //Clear plaintext 
    memset(plainText, '\0', cLen);
@@ -247,7 +247,7 @@ int main(int argc, char **argv) {
  	//clear buffer each use
  	memset((char *)buffer, '\0', sizeof(buffer));
 
- 	r = recv(socketfd, buffer, 1024, 0);//receive
+ 	r = recv(socketfd, &buffer, 1024, 0);//receive
 
 	   if(r == -1) {
 		//Error receiving data
