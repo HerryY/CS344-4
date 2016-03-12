@@ -246,7 +246,7 @@ int main(int argc, char ** argv) {
 
 		cipherSend[1024] = '\0'; //null terminate
 
-   		if(send(client_socket, &cipherSend, 1024, 0) < pLen) {
+   		if(send(client_socket, &cipherSend, 1024, 0) == -1) {
 		    printf("encryption text send\n");
 		}
 

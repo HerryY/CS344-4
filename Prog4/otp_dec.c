@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
    if (confirm != 0) {
 	printf("could not contact otp_dec_d on port %d\n",
 		portNum);
-	exit(1);
+	exit(2);
    }
 
    //Successful connection to otp_enc_d
@@ -191,15 +191,44 @@ int main(int argc, char **argv) {
    }
 
    //Send cipher text
-   if(send(socketfd, cipherText, cLen, 0) < cLen){
-	printf("cipher text send\n");
-	exit(1);
+   int len = 0;
+   while (len <= cLen) {
+	char cipherSend[1024];
+
+	//subset of cipher  to send
+	strncpy(cipherSend, &cipherText[len], 1023);
+
+	cipherSend[1024] = '\0'; //null terminate
+
+	//send
+   	if(send(socketfd, cipherText, cLen, 0) == -1){
+	   //If error sending
+	   printf("cipher text send\n");
+	   exit(1);
+	}
+
+	len += 1023; //Add len sent to len
    }
 
    //Send key text
-   if(send(socketfd, keyText, kLen, 0) < kLen){
-	perror("key text send");
-	exit(1);
+   len = 0;
+   while (len <= kLen) { //while whole key is not sent
+	char keySend[1024];//subset
+
+	//subset of key to send
+	strncpy(keySend, &keyText[len], 1023);
+
+	//null terminate
+	keySend[1024] = '\0';
+
+	//send
+   	if(send(socketfd, keyText, kLen, 0) < kLen){
+	   //If error sending
+	   perror("key text send");
+	   exit(1);
+	}
+
+	len += 1023; //add len sent to len
    }
 
    //Receive back decrypted text
@@ -211,14 +240,16 @@ int main(int argc, char **argv) {
    memset(plainText, '\0', cLen);
 
    //Receive plain text
-   int len = 0;
+   len = 0;
    r = 0;
    while(len < cLen) { //while the whole file has not 
  		       //been received
- 	r = recv(socketfd, buffer, cLen, 0);//receive
-	len += r;//add len received to total len received
+ 	//clear buffer each use
+ 	memset((char *)buffer, '\0', sizeof(buffer));
 
-	if (r <= len) {//If total len not yet received
+ 	r = recv(socketfd, buffer, cLen, 0);//receive
+
+
 	   if(r == -1) {
 		//Error receiving data
 		printf("recv plain text file -1\n");
@@ -227,21 +258,21 @@ int main(int argc, char **argv) {
 	   else if(r == 0) {
 		//end of data
 		if(len < cLen) {
-		   printf("recv plain text file <\n");
 		   break;
 		}
 	   }
 	   else {
 		//concat string
-		strncat(plainText,buffer,r);
+		strncat(plainText,buffer,(r-1));
 	   }	   
-	}
+	
+	len += (r-1); //add len received to len
    }
 
    plainText[cLen] = '\n';
 
    //Print plain text
-   printf("%s", plainText);
+   printf("%s\n", plainText);
 
    //Free memory
    free(plainText);
